@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MaxHeightRecyclerView">
+        <attr name="maxHeight" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="SlidingMenu">
+        <attr name="rightMargin" format="dimension"/>
+    </declare-styleable>
+</resources>

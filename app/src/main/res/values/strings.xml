@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name" translatable="false">Black Button</string>
+    <string name="link" translatable="false">link</string>
+    <string name="select_server" translatable="false">Select Server</string>
+    <string name="connect" translatable="false">Connect</string>
+    <string name="contact_us" translatable="false">Contact us</string>
+    <string name="privacy_agreement">Privacy agreement</string>
+    <string name="share">Share</string>
+</resources>

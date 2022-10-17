@@ -1,0 +1,76 @@
+{
+  "safeLocation": [
+    {
+      "ufo_pwd": "Ultr@r00t_2017",
+      "ufo_method": "chacha20-ietf-poly1305",
+      "ufo_port": 819,
+      "ufo_country": "Japan2",
+      "ufo_city": "Tokyo2",
+      "ufo_ip": "185.172.113.83"
+    },
+    {
+      "ufo_pwd": "Ultr@r00t_2017",
+      "ufo_method": "chacha20-ietf-poly1305",
+      "ufo_port": 819,
+      "ufo_country": "United Kingdom",
+      "ufo_city": "London",
+      "ufo_ip": "5.8.33.236"
+    },
+    {
+      "ufo_pwd": "Ultr@r00t_2017",
+      "ufo_method": "chacha20-ietf-poly1305",
+      "ufo_port": 819,
+      "ufo_country": "Singapore",
+      "ufo_city": "Singapore",
+      "ufo_ip": "217.197.161.8"
+    },
+    {
+      "ufo_pwd": "Ultr@r00t_2017",
+      "ufo_method": "chacha20-ietf-poly1305",
+      "ufo_port": 819,
+      "ufo_country": "Japan1",
+      "ufo_city": "Tokyo1",
+      "ufo_ip": "5.252.198.154"
+    },
+    {
+      "ufo_pwd": "Ultr@r00t_2017",
+      "ufo_method": "chacha20-ietf-poly1305",
+      "ufo_port": 812,
+      "ufo_country": "United States",
+      "ufo_city": "Chicago",
+      "ufo_ip": "92.38.176.81"
+    },
+    {
+      "ufo_pwd": "Ultr@r00t_2017",
+      "ufo_method": "chacha20-ietf-poly1305",
+      "ufo_port": 812,
+      "ufo_country": "United States",
+      "ufo_city": "Atlanta",
+      "ufo_ip": "167.88.63.3"
+    },
+    {
+      "ufo_pwd": "Ultr@r00t_2017",
+      "ufo_method": "chacha20-ietf-poly1305",
+      "ufo_port": 812,
+      "ufo_country": "United States",
+      "ufo_city": "San Francisc",
+      "ufo_ip": "38.107.226.51"
+    },
+    {
+      "ufo_pwd": "Ultr@r00t_2017",
+      "ufo_method": "chacha20-ietf-poly1305",
+      "ufo_port": 812,
+      "ufo_country": "Canada",
+      "ufo_city": "Toronto",
+      "ufo_ip": "198.57.27.61"
+    },
+    {
+      "ufo_pwd": "Ultr@r00t_2017",
+      "ufo_method": "chacha20-ietf-poly1305",
+      "ufo_port": 812,
+      "ufo_country": "Germany",
+      "ufo_city": "Frankfurt",
+      "ufo_ip": "51.38.118.42"
+    }
+  ]
+}
