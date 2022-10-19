@@ -1,8 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.BlackButton" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!--将ActionBar隐藏,这里使用ToolBar-->
+        <item name="windowActionBar">false</item>
+        <!-- 使用 API Level 22以上编译的话，要拿掉前綴字 -->
+        <item name="windowNoTitle">true</item>
+        <!--colorPrimary 对应ToolBar的颜色-->
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
+        <!--colorPrimaryDark对应状态栏的颜色-->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <!--colorAccent 对应EditText编辑时、RadioButton选中、CheckBox等选中时的颜色。-->
+        <item name="colorAccent">@color/colorPrimary</item>
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
@@ -24,5 +33,21 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:navigationBarColor" >@android:color/transparent</item>
         <item name="android:statusBarColor" >@android:color/transparent</item>
+    </style>
+
+    <style name="radio_group">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingLeft">31dp</item>
+        <item name="android:paddingRight">31dp</item>
+        <item name="android:paddingTop">@dimen/dp18</item>
+        <item name="android:paddingBottom">@dimen/dp18</item>
+        <item name="android:layout_margin">@dimen/dp3</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:button">@null</item>
+        <item name="android:background">@drawable/radio_button_selector</item>
+        <item name="android:textSize">@dimen/sp13</item>
+        <item name="android:textColor">@color/radio_color_check</item>
     </style>
 </resources>

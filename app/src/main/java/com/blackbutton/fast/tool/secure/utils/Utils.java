@@ -2,9 +2,15 @@ package com.blackbutton.fast.tool.secure.utils;
 
 import static androidx.work.impl.utils.ProcessUtils.getProcessName;
 
+import static com.xuexiang.xutil.app.ActivityUtils.startActivity;
+import static com.xuexiang.xutil.app.AppUtils.getPackageManager;
+
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +23,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
@@ -32,10 +39,12 @@ import androidx.annotation.Nullable;
 
 import com.blackbutton.fast.tool.secure.bean.ProfileBean;
 import com.github.shadowsocks.R;
+import com.xuexiang.xutil.tip.ToastUtils;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -466,17 +475,19 @@ public final class Utils {
     /**
      * 添加最佳线路
      */
-    public static ProfileBean.SafeLocation addTheBestRoute(List<ProfileBean.SafeLocation> data) {
+    public static ProfileBean.SafeLocation addTheBestRoute(ProfileBean.SafeLocation data) {
         ProfileBean.SafeLocation bestRoute;
         bestRoute = new ProfileBean.SafeLocation();
-        bestRoute.setUfo_country("Faster server");
-        bestRoute.setUfo_city(null);
-        bestRoute.setUfo_ip(data.get(0).getUfo_ip());
-        bestRoute.setUfo_method(data.get(0).getUfo_method());
-        bestRoute.setUfo_port(data.get(0).getUfo_port());
-        bestRoute.setUfo_pwd(data.get(0).getUfo_pwd());
+        bestRoute.setUfo_country(data.getUfo_country());
+        bestRoute.setUfo_city(data.getUfo_city());
+        bestRoute.setUfo_ip(data.getUfo_ip());
+        bestRoute.setUfo_method(data.getUfo_method());
+        bestRoute.setUfo_port(data.getUfo_port());
+        bestRoute.setUfo_pwd(data.getUfo_pwd());
         bestRoute.setCheek_state(true);
+        bestRoute.setBestServer(true);
         return bestRoute;
     }
+
 }
 

@@ -13,7 +13,14 @@ import com.blackbutton.fast.tool.secure.constant.Constant
 import com.blackbutton.fast.tool.secure.utils.JsonUtil
 import com.blackbutton.fast.tool.secure.utils.ResourceUtils.readStringFromAssert
 import com.blackbutton.fast.tool.secure.bean.ProfileBean
+import com.blackbutton.fast.tool.secure.utils.DensityUtils.dp2px
+import com.blackbutton.fast.tool.secure.utils.DensityUtils.px2dp
+import com.blackbutton.fast.tool.secure.utils.MmkvUtils
+import com.blackbutton.fast.tool.secure.utils.NetworkPing
+import com.blackbutton.fast.tool.secure.utils.StatusBarUtils
 import com.blackbutton.fast.tool.secure.utils.Utils.addTheBestRoute
+import com.blackbutton.fast.tool.secure.utils.Utils.isNullOrEmpty
+import com.example.testdemo.utils.KLog
 import com.github.shadowsocks.R
 import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
@@ -21,26 +28,34 @@ import com.jeremyliao.liveeventbus.LiveEventBus
 class ServiceListActivity : AppCompatActivity() {
     private lateinit var frameLayoutTitle: FrameLayout
     private lateinit var blackTitle: ImageView
-    private lateinit var imgTitle:ImageView
-    private lateinit var tvTitle:TextView
-    private lateinit var ivRight:ImageView
+    private lateinit var imgTitle: ImageView
+    private lateinit var tvTitle: TextView
+    private lateinit var ivRight: ImageView
     private lateinit var serviceListAdapter: ServiceListAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var profileBean: ProfileBean
     private lateinit var safeLocation: MutableList<ProfileBean.SafeLocation>
     private lateinit var checkSafeLocation: ProfileBean.SafeLocation
 
-    private lateinit var tvConnect:TextView
+    private lateinit var tvConnect: TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        StatusBarUtils.translucent(this)
+        StatusBarUtils.setStatusBarLightMode(this)
         setContentView(R.layout.activity_service_list)
         initRecyclerView()
     }
 
     private fun initRecyclerView() {
-        frameLayoutTitle =findViewById(R.id.bar_service_list)
+        frameLayoutTitle = findViewById(R.id.bar_service_list)
+        frameLayoutTitle.setPadding(
+            0,
+            px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat()) + 10,
+            0,
+            0
+        )
         blackTitle = findViewById(R.id.ivBack)
-        imgTitle =findViewById(R.id.img_title)
+        imgTitle = findViewById(R.id.img_title)
         tvTitle = findViewById(R.id.tv_title)
         ivRight = findViewById(R.id.ivRight)
         tvConnect = findViewById(R.id.tv_connect)
@@ -49,22 +64,25 @@ class ServiceListActivity : AppCompatActivity() {
         tvTitle.visibility = View.VISIBLE
         ivRight.visibility = View.GONE
         blackTitle.setImageResource(R.mipmap.ic_black)
-        safeLocation = ArrayList()
-        profileBean = ProfileBean()
-        checkSafeLocation = ProfileBean.SafeLocation()
-        profileBean = getMenuJsonData("serviceJson.json")
-        safeLocation = profileBean.safeLocation!!
-        safeLocation.add(0,addTheBestRoute(safeLocation))
+
+        storageServerData()
         serviceListAdapter = ServiceListAdapter(safeLocation)
         val layoutManager = LinearLayoutManager(this)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = serviceListAdapter
+        clickEvent()
+
+    }
+    /**
+     * 点击事件
+     */
+    private fun clickEvent() {
         serviceListAdapter.setOnItemClickListener { _, _, position ->
             safeLocation.forEachIndexed { index, _ ->
                 safeLocation[index].cheek_state = position == index
-                if(safeLocation[index].cheek_state == true){
-                    checkSafeLocation= safeLocation[index]
+                if (safeLocation[index].cheek_state == true) {
+                    checkSafeLocation = safeLocation[index]
                 }
             }
             serviceListAdapter.notifyDataSetChanged()
@@ -73,16 +91,36 @@ class ServiceListActivity : AppCompatActivity() {
             finish()
         }
         tvConnect.setOnClickListener {
+            checkSafeLocation.ufo_country
             LiveEventBus.get(Constant.SERVER_INFORMATION).post(checkSafeLocation)
             finish()
         }
     }
 
     /**
+     * 存储服务器数据
+     */
+    private fun storageServerData() {
+        safeLocation = ArrayList()
+        profileBean = ProfileBean()
+        checkSafeLocation = ProfileBean.SafeLocation()
+        profileBean = if (isNullOrEmpty(MmkvUtils.getStringValue(Constant.PROFILE_DATA))) {
+            getMenuJsonData("serviceJson.json")
+        } else {
+            JsonUtil.fromJson(
+                MmkvUtils.getStringValue(Constant.PROFILE_DATA),
+                object : TypeToken<ProfileBean?>() {}.type
+            )
+        }
+        safeLocation = profileBean.safeLocation!!
+        safeLocation.add(0, addTheBestRoute(NetworkPing.findTheBestIp()))
+        checkSafeLocation = safeLocation[0]
+    }
+
+    /**
      * @return 解析json文件
      */
     private fun getMenuJsonData(jsonName: String): ProfileBean {
-        Log.i("TAG", "getMenuJsonData: " + readStringFromAssert(jsonName))
         return JsonUtil.fromJson(
             readStringFromAssert(jsonName),
             object : TypeToken<ProfileBean?>() {}.type

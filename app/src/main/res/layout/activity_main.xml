@@ -54,7 +54,7 @@
                         android:id="@+id/img_country"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@mipmap/unitedkingdom" />
+                        android:src="@mipmap/unitedkingdom"/>
 
                     <TextView
                         android:id="@+id/tv_location"
@@ -74,17 +74,17 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-
-                    <ImageView
+                    <com.airbnb.lottie.LottieAnimationView
                         android:id="@+id/img_switch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:src="@mipmap/ic_switch"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:lottie_fileName="data.json"
+                        app:lottie_imageAssetsFolder="images"
+                        app:lottie_loop="true"/>
                     <TextView
                         android:id="@+id/txt_connect"
                         android:layout_width="wrap_content"
@@ -96,6 +96,29 @@
                         app:layout_constraintStart_toStartOf="@+id/img_switch"
                         app:layout_constraintTop_toTopOf="@+id/img_switch" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <RadioGroup
+                    android:id="@+id/radio_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/dp18"
+                    android:background="@drawable/radio_group_bg"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radio_button0"
+                        style="@style/radio_group"
+                        android:text="@string/on" />
+
+                    <RadioButton
+                        android:id="@+id/radio_button1"
+                        style="@style/radio_group"
+                        android:checked="true"
+                        android:text="@string/off" />
+
+                </RadioGroup>
+
 
             </LinearLayout>
 

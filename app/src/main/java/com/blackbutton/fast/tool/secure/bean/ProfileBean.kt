@@ -9,7 +9,9 @@ class ProfileBean {
         var ufo_country: String? = null
         var ufo_city: String? = null
         var ufo_ip: String? = null
+        //是否选中
         var cheek_state: Boolean? = false
-        var ic_country:Int? = null
+        //是否是最佳服务器
+        var bestServer:Boolean? = false
     }
 }

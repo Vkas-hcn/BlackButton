@@ -2,6 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <uses-configuration android:sharedUserId="android.uid.system" />
+    <uses-configuration android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name="com.blackbutton.fast.tool.secure.app.App"
         android:icon="@mipmap/logo"
@@ -10,8 +18,8 @@
         tools:replace="android:icon">
         <activity
             android:name="com.blackbutton.fast.tool.secure.ui.StartupActivity"
-            android:theme="@style/Theme.BlackButton"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.BlackButton">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,9 +32,16 @@
         </activity>
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2174740078812392~7263824144"/>
+            android:value="ca-app-pub-2174740078812392~7263824144" />
+
         <activity android:name="com.blackbutton.fast.tool.secure.MainActivity" />
-        <activity android:name="com.blackbutton.fast.tool.secure.ui.servicelist.ServiceListActivity"/>
+        <activity android:name="com.blackbutton.fast.tool.secure.ui.servicelist.ServiceListActivity" />
+        <activity
+            android:name="com.blackbutton.fast.tool.secure.ui.agreement.AgreementWebView"
+            android:launchMode="singleTop" />
+        <activity
+            android:name="com.blackbutton.fast.tool.secure.ui.ResultsActivity"
+            android:launchMode="singleTop" />
     </application>
 
 </manifest>

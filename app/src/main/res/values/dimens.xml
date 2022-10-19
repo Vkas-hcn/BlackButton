@@ -90,4 +90,14 @@
     <dimen name="sp30">30dp</dimen>
     <dimen name="sp36">36dp</dimen>
     <dimen name="sp50">50dp</dimen>
+
+    <!--ProgressView-->
+    <dimen name="default_pv_trace_width">16dp</dimen>
+    <dimen name="default_pv_progress_text_size">28sp</dimen>
+    <dimen name="default_pv_corner_radius">5dp</dimen>
+    <dimen name="default_pv_horizontal_text_size">14sp</dimen>
+    <dimen name="default_pv_zone_length">22dp</dimen>
+    <dimen name="default_pv_zone_width">6dp</dimen>
+    <dimen name="default_pv_zone_padding">16dp</dimen>
+    <dimen name="default_pv_zone_corner_radius">8dp</dimen>
 </resources>

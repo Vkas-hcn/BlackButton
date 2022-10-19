@@ -31,5 +31,12 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-ads:21.0.0")
     implementation("com.jeremyliao:live-event-bus-x:1.5.7")
+    //XUtil
+    implementation ("com.github.xuexiangjys.XUtil:xutil-core:1.1.7")
     implementation("com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.8")
+    implementation(platform("com.google.firebase:firebase-bom:29.3.1"))
+    implementation("com.google.firebase:firebase-config-ktx")
+    implementation("com.tencent:mmkv:1.0.23")
+    implementation ("com.airbnb.android:lottie:3.3.1")
+
 }

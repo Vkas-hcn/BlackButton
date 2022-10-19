@@ -169,21 +169,21 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                 .addDnsServer(PRIVATE_VLAN4_ROUTER)
 
         if (profile.ipv6) builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
-
-        if (profile.proxyApps) {
-            val me = packageName
-            profile.individual.split('\n')
-                    .filter { it != me }
-                    .forEach {
-                        try {
-                            if (profile.bypass) builder.addDisallowedApplication(it)
-                            else builder.addAllowedApplication(it)
-                        } catch (ex: PackageManager.NameNotFoundException) {
-                            Timber.w(ex)
-                        }
-                    }
-            if (!profile.bypass) builder.addAllowedApplication(me)
-        }
+        AroundFlowConfigure.brand(this,builder,this.packageName)
+//        if (profile.proxyApps) {
+//            val me = packageName
+//            profile.individual.split('\n')
+//                    .filter { it != me }
+//                    .forEach {
+//                        try {
+//                            if (profile.bypass) builder.addDisallowedApplication(it)
+//                            else builder.addAllowedApplication(it)
+//                        } catch (ex: PackageManager.NameNotFoundException) {
+//                            Timber.w(ex)
+//                        }
+//                    }
+//            if (!profile.bypass) builder.addAllowedApplication(me)
+//        }
 
         when (profile.route) {
             Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> {

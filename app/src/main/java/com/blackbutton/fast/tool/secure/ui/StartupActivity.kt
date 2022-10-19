@@ -1,20 +1,39 @@
 package com.blackbutton.fast.tool.secure.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Looper
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-
-import java.util.*
-import android.content.Intent
 import com.blackbutton.fast.tool.secure.MainActivity
-import com.blackbutton.fast.tool.secure.utils.StatusBarUtils
+import com.github.shadowsocks.bean.AroundFlowBean
+import com.blackbutton.fast.tool.secure.constant.Constant
+import com.blackbutton.fast.tool.secure.utils.*
+import com.blackbutton.fast.tool.secure.utils.NetworkPing.findTheBestIp
+import com.blackbutton.fast.tool.secure.widget.HorizontalProgressView
+import com.example.testdemo.utils.KLog
+import com.github.shadowsocks.BuildConfig
 import com.github.shadowsocks.R
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.initialize
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.util.*
 
 /**
  * Startup Page
  */
-class StartupActivity: AppCompatActivity() {
+class StartupActivity : AppCompatActivity(),
+    HorizontalProgressView.HorizontalProgressUpdateListener {
+    private lateinit var horizontalProgressView: HorizontalProgressView
+
+    // 绕流数据
+    private lateinit var aroundFlowData: AroundFlowBean
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         StatusBarUtils.translucent(this)
@@ -22,7 +41,13 @@ class StartupActivity: AppCompatActivity() {
         supportActionBar?.hide()
         initView()
     }
+
     private fun initView() {
+        horizontalProgressView = findViewById(R.id.pb_start)
+        horizontalProgressView.setProgressViewUpdateListener(this)
+        horizontalProgressView.startProgressAnimation()
+        aroundFlowData = AroundFlowBean()
+        getFirebaseData()
         val timer = Timer()
         val timerTask: TimerTask = HomeTimerTask()
         timer.schedule(timerTask, 2000)
@@ -31,7 +56,23 @@ class StartupActivity: AppCompatActivity() {
             .observeForever {
                 jumpPage()
             }
+
     }
+
+    /**
+     * 获取Firebase数据
+     */
+    private fun getFirebaseData() {
+        if (BuildConfig.DEBUG) {
+            return
+        }
+        val auth = Firebase.remoteConfig
+        auth.fetchAndActivate().addOnSuccessListener {
+            MmkvUtils.set(Constant.AROUND_FLOW_DATA, auth.getString("aroundFlowData"))
+            MmkvUtils.set(Constant.PROFILE_DATA, auth.getString("profileData"))
+        }
+    }
+
     /**
      * 延时
      */
@@ -42,6 +83,7 @@ class StartupActivity: AppCompatActivity() {
             Looper.loop()
         }
     }
+
     /**
      * 跳转页面
      */
@@ -49,11 +91,24 @@ class StartupActivity: AppCompatActivity() {
         val intent = Intent(this@StartupActivity, MainActivity::class.java)
         startActivity(intent)
     }
+
     override fun onStop() {
         super.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        horizontalProgressView.stopProgressAnimation()
+        horizontalProgressView.setProgressViewUpdateListener(null)
+        NetworkPing.pingCancle()
+    }
+
+    override fun onHorizontalProgressStart(view: View?) {
+    }
+
+    override fun onHorizontalProgressUpdate(view: View?, progress: Float) {
+    }
+
+    override fun onHorizontalProgressFinished(view: View?) {
     }
 }

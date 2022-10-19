@@ -30,23 +30,30 @@ import com.example.testdemo.utils.KLog
 import com.github.shadowsocks.BuildConfig
 import com.github.shadowsocks.Core
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.initialize
 
 import com.jeremyliao.liveeventbus.LiveEventBus
+import com.tencent.mmkv.MMKV
+import com.xuexiang.xutil.XUtil
 
 class App : Application(), androidx.work.Configuration.Provider by Core {
     override fun onCreate() {
         super.onCreate()
+        MMKV.initialize(this)
         if(Utils.isMainProcess(this)){
             MobileAds.initialize(this) {}
-            Core.init(this, MainActivity::class)
             AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+            Firebase.initialize(this)
             ResUtils.init(this)
+            XUtil.init(this)
             LiveEventBus
                 .config().supportBroadcast(this)
                 .lifecycleObserverAlwaysActive(true)
             //是否开启打印日志
             KLog.init(BuildConfig.DEBUG)
         }
+        Core.init(this, MainActivity::class)
 
     }
 

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/main_background"
     tools:context="com.blackbutton.fast.tool.secure.ui.StartupActivity">
     <FrameLayout
@@ -36,11 +37,21 @@
         </LinearLayout>
     </FrameLayout>
 
-    <ProgressBar
+
+    <com.blackbutton.fast.tool.secure.widget.HorizontalProgressView
         android:id="@+id/pb_start"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbarStyle="outsideInset"
+        android:layout_width="210dp"
+        android:layout_height="30dp"
+        app:hpv_end_color="@color/colorAccent"
+        app:hpv_end_progress="92"
+        app:hpv_isTracked="true"
+        app:hpv_progress_duration="2600"
+        app:hpv_progress_textColor="#696969"
+        app:hpv_progress_textVisibility="false"
+        app:hpv_start_color="@color/colorAccent"
+        app:hpv_track_color="#EEEEEE"
+        app:hpv_corner_radius="@dimen/dp10"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="88dp"/>
 </RelativeLayout>

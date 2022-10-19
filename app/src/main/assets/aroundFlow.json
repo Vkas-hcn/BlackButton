@@ -1,0 +1,9 @@
+{
+  "around_flow_mode": "1",
+  "black_list": [
+    "com.microsoft.emmx","com.xuexiang.xuidemo"
+  ],
+  "white_list": [
+    "com.android.browser"
+  ]
+}
