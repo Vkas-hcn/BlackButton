@@ -226,8 +226,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         DataStore.publicStore.registerChangeListener(this)
         ProfileManager.getProfile(DataStore.profileId).let {
             val bestData = findTheBestIp()
-            tvLocation.text = bestData.ufo_country + "-" + bestData.ufo_city
-            imgCountry.setImageResource(FlagConversion(bestData.ufo_country))
+            tvLocation.text = bestData.bb_country + "-" + bestData.bb_city
+            imgCountry.setImageResource(FlagConversion(bestData.bb_country))
             if (it != null) {
                 ProfileManager.updateProfile(setServerData(it, bestData))
             } else {
@@ -242,11 +242,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
      * 设置服务器数据
      */
     private fun setServerData(profile: Profile, bestData: ProfileBean.SafeLocation): Profile {
-        profile.name = bestData.ufo_country + "-" + bestData.ufo_city
-        profile.host = bestData.ufo_ip.toString()
-        profile.remotePort = bestData.ufo_port!!
-        profile.password = bestData.ufo_pwd!!
-        profile.method = bestData.ufo_method!!
+        profile.name = bestData.bb_country + "-" + bestData.bb_city
+        profile.host = bestData.bb_ip.toString()
+        profile.remotePort = bestData.bb_port!!
+        profile.password = bestData.bb_pwd!!
+        profile.method = bestData.bb_method!!
         return profile
     }
 
@@ -260,7 +260,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         }
         checkSafeLocation = ProfileBean.SafeLocation()
         checkSafeLocation = safeLocation
-        checkSafeLocation.ufo_country.let {
+        checkSafeLocation.bb_country.let {
 
         }
         if (checkSafeLocation.bestServer==true) {
@@ -268,8 +268,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
             imgCountry.setImageResource(FlagConversion(Constant.FASTER_SERVER))
 
         } else {
-            tvLocation.text = checkSafeLocation.ufo_country + "-" + checkSafeLocation.ufo_city
-            imgCountry.setImageResource(FlagConversion(checkSafeLocation.ufo_country))
+            tvLocation.text = checkSafeLocation.bb_country + "-" + checkSafeLocation.bb_city
+            imgCountry.setImageResource(FlagConversion(checkSafeLocation.bb_country))
         }
         ProfileManager.getProfile(DataStore.profileId).let {
             if (it != null) {

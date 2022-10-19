@@ -421,51 +421,51 @@ public final class Utils {
     /**
      * 国旗转化
      */
-    public static int FlagConversion(String ufo_country) {
-        if(ufo_country.contains("Faster server")){
+    public static int FlagConversion(String bb_country) {
+        if(bb_country.contains("Faster server")){
             return R.mipmap.ic_country;
-        }else if (ufo_country.contains("Japan")) {
+        }else if (bb_country.contains("Japan")) {
             return R.mipmap.japan;
-        }else if(ufo_country.contains("United Kingdom")){
+        }else if(bb_country.contains("United Kingdom")){
             return R.mipmap.unitedkingdom;
-        }else if (ufo_country.contains("Australia")) {
+        }else if (bb_country.contains("Australia")) {
             return R.mipmap.australia;
-        }else if (ufo_country.contains("Belgium")) {
+        }else if (bb_country.contains("Belgium")) {
             return R.mipmap.belgium;
-        }else if (ufo_country.contains("Brazil")) {
+        }else if (bb_country.contains("Brazil")) {
             return R.mipmap.brazil;
-        }else if (ufo_country.contains("Canada")) {
+        }else if (bb_country.contains("Canada")) {
             return R.mipmap.canada;
-        }else if (ufo_country.contains("France")) {
+        }else if (bb_country.contains("France")) {
             return R.mipmap.france;
-        }else if (ufo_country.contains("Germany")) {
+        }else if (bb_country.contains("Germany")) {
             return R.mipmap.germany;
-        }else if (ufo_country.contains("Hongkong")) {
+        }else if (bb_country.contains("Hongkong")) {
             return R.mipmap.hongkong;
-        }else if (ufo_country.contains("India")) {
+        }else if (bb_country.contains("India")) {
             return R.mipmap.india;
-        }else if (ufo_country.contains("Ireland")) {
+        }else if (bb_country.contains("Ireland")) {
             return R.mipmap.ireland;
         }
-        else if (ufo_country.contains("italy")) {
+        else if (bb_country.contains("italy")) {
             return R.mipmap.italy;
-        }else if (ufo_country.contains("Koreasouth")) {
+        }else if (bb_country.contains("Koreasouth")) {
             return R.mipmap.koreasouth;
-        }else if (ufo_country.contains("Netherlands")) {
+        }else if (bb_country.contains("Netherlands")) {
             return R.mipmap.netherlands;
-        }else if (ufo_country.contains("Newzealand")) {
+        }else if (bb_country.contains("Newzealand")) {
             return R.mipmap.newzealand;
-        }else if (ufo_country.contains("Norway")) {
+        }else if (bb_country.contains("Norway")) {
             return R.mipmap.norway;
-        }else if (ufo_country.contains("Russianfederation")) {
+        }else if (bb_country.contains("Russianfederation")) {
             return R.mipmap.russianfederation;
-        }else if (ufo_country.contains("Singapore")) {
+        }else if (bb_country.contains("Singapore")) {
             return R.mipmap.singapore;
-        }else if (ufo_country.contains("Sweden")) {
+        }else if (bb_country.contains("Sweden")) {
             return R.mipmap.sweden;
-        }else if (ufo_country.contains("Switzerland")) {
+        }else if (bb_country.contains("Switzerland")) {
             return R.mipmap.switzerland;
-        }else if (ufo_country.contains("tw")) {
+        }else if (bb_country.contains("tw")) {
             return R.mipmap.tw;
         }else {
             return R.mipmap.ic_country;
@@ -478,12 +478,12 @@ public final class Utils {
     public static ProfileBean.SafeLocation addTheBestRoute(ProfileBean.SafeLocation data) {
         ProfileBean.SafeLocation bestRoute;
         bestRoute = new ProfileBean.SafeLocation();
-        bestRoute.setUfo_country(data.getUfo_country());
-        bestRoute.setUfo_city(data.getUfo_city());
-        bestRoute.setUfo_ip(data.getUfo_ip());
-        bestRoute.setUfo_method(data.getUfo_method());
-        bestRoute.setUfo_port(data.getUfo_port());
-        bestRoute.setUfo_pwd(data.getUfo_pwd());
+        bestRoute.setBb_country(data.getBb_country());
+        bestRoute.setBb_city(data.getBb_city());
+        bestRoute.setBb_ip(data.getBb_ip());
+        bestRoute.setBb_method(data.getBb_method());
+        bestRoute.setBb_port(data.getBb_port());
+        bestRoute.setBb_pwd(data.getBb_pwd());
         bestRoute.setCheek_state(true);
         bestRoute.setBestServer(true);
         return bestRoute;

@@ -91,7 +91,7 @@ class ServiceListActivity : AppCompatActivity() {
             finish()
         }
         tvConnect.setOnClickListener {
-            checkSafeLocation.ufo_country
+            checkSafeLocation.bb_country
             LiveEventBus.get(Constant.SERVER_INFORMATION).post(checkSafeLocation)
             finish()
         }

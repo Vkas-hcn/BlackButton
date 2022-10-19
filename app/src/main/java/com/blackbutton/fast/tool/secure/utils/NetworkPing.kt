@@ -1,6 +1,5 @@
 package com.blackbutton.fast.tool.secure.utils
 
-import android.util.Log
 import com.blackbutton.fast.tool.secure.bean.ProfileBean
 import com.blackbutton.fast.tool.secure.constant.Constant
 import com.example.testdemo.utils.KLog
@@ -21,7 +20,7 @@ object NetworkPing {
             while (true) {
                 profile.safeLocation.let { it ->
                     it?.map {
-                        it.ufo_ip?.let { it1 ->
+                        it.bb_ip?.let { it1 ->
                           KLog.e("TAG2","==="+pingIP(it1) )
                         }
                     }
