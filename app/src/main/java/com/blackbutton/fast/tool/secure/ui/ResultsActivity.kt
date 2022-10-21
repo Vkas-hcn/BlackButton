@@ -34,7 +34,7 @@ class ResultsActivity: AppCompatActivity() {
     private fun initView() {
         frameLayoutTitle =findViewById(R.id.bar_results)
         frameLayoutTitle.setPadding(0,
-            DensityUtils.px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat())+10,0,0)
+            DensityUtils.px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat())+50,0,0)
         blackTitle = findViewById(R.id.ivBack)
         imgTitle =findViewById(R.id.img_title)
         tvTitle = findViewById(R.id.tv_title)

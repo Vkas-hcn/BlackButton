@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.preference.PreferenceDataStore
 import com.airbnb.lottie.LottieAnimationView
 import com.blackbutton.fast.tool.secure.bean.ProfileBean
@@ -17,13 +18,11 @@ import com.blackbutton.fast.tool.secure.constant.Constant
 import com.blackbutton.fast.tool.secure.ui.ResultsActivity
 import com.blackbutton.fast.tool.secure.ui.agreement.AgreementWebView
 import com.blackbutton.fast.tool.secure.ui.servicelist.ServiceListActivity
-import com.blackbutton.fast.tool.secure.utils.DensityUtils
-import com.blackbutton.fast.tool.secure.utils.JsonUtil
+import com.blackbutton.fast.tool.secure.utils.*
 import com.blackbutton.fast.tool.secure.utils.NetworkPing.findTheBestIp
-import com.blackbutton.fast.tool.secure.utils.ResourceUtils
-import com.blackbutton.fast.tool.secure.utils.StatusBarUtils
 import com.blackbutton.fast.tool.secure.utils.Utils.FlagConversion
 import com.blackbutton.fast.tool.secure.widget.SlidingMenu
+import com.example.testdemo.utils.KLog
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.IShadowsocksService
@@ -70,17 +69,21 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
     private lateinit var tvContact: TextView
     private lateinit var tvAgreement: TextView
     private lateinit var tvShare: TextView
-    private lateinit var radioGroup: RadioGroup
+    private lateinit var radioGroup: LinearLayout
+    private lateinit var radioButton0: TextView
+    private lateinit var radioButton1: TextView
+    private lateinit var clSwitch: ConstraintLayout
     private var mInterstitialAd: InterstitialAd? = null
-    private lateinit var checkSafeLocation: ProfileBean.SafeLocation
     var state = BaseService.State.Idle
     private val connection = ShadowsocksConnection(true)
-    private var rangeTime = 0
+    private var rangeTime = 0f
+    private lateinit var bestServiceData: ProfileBean.SafeLocation
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         StatusBarUtils.translucent(this)
         StatusBarUtils.setStatusBarLightMode(this)
         setContentView(R.layout.activity_main)
+        initParam()
         initAd()
         initView()
         clickEvent()
@@ -91,8 +94,19 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
 
     private val connect = registerForActivityResult(StartService()) {
         if (it) {
+            imgSwitch.pauseAnimation()
             ToastUtils.toast(R.string.insufficient_permissions)
         }
+    }
+
+    /**
+     * initParam
+     */
+    private fun initParam() {
+        bestServiceData = JsonUtil.fromJson(
+            intent.getStringExtra(Constant.BEST_SERVICE_DATA),
+            object : TypeToken<ProfileBean.SafeLocation?>() {}.type
+        )
     }
 
     private fun initLiveBus() {
@@ -119,31 +133,22 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
                 }
 
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    Log.d("TAG", "Ad was loaded.")
                     mInterstitialAd = interstitialAd
                 }
             })
         mInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
-                // Called when a click is recorded for an ad.
-                Log.d("TAG", "Ad was clicked.")
             }
 
             override fun onAdDismissedFullScreenContent() {
-                // Called when ad is dismissed.
-                Log.d("TAG", "Ad dismissed fullscreen content.")
                 mInterstitialAd = null
             }
 
 
             override fun onAdImpression() {
-                // Called when an impression is recorded for an ad.
-                Log.d("TAG", "Ad recorded an impression.")
             }
 
             override fun onAdShowedFullScreenContent() {
-                // Called when ad is shown.
-                Log.d("TAG", "Ad showed fullscreen content.")
             }
         }
 
@@ -153,7 +158,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         frameLayoutTitle = findViewById(R.id.main_title)
         frameLayoutTitle.setPadding(
             0,
-            DensityUtils.px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat()) + 10, 0, 0
+            DensityUtils.px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat()) + 50, 0, 0
         )
         timer = findViewById(R.id.timer)
         imgSwitch = findViewById(R.id.img_switch)
@@ -161,6 +166,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         imgCountry = findViewById(R.id.img_country)
         tvLocation = findViewById(R.id.tv_location)
         radioGroup = findViewById(R.id.radio_group)
+        radioButton0 = findViewById(R.id.radio_button0)
+        radioButton1 = findViewById(R.id.radio_button1)
         rightTitle = frameLayoutTitle.findViewById(R.id.ivRight)
         navigation = frameLayoutTitle.findViewById(R.id.ivBack)
         slidingMenu = findViewById(R.id.slidingMenu)
@@ -168,6 +175,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         tvContact = laHomeMenu.findViewById(R.id.tv_contact)
         tvAgreement = laHomeMenu.findViewById(R.id.tv_agreement)
         tvShare = laHomeMenu.findViewById(R.id.tv_share)
+        clSwitch = findViewById(R.id.cl_switch)
     }
 
     /**
@@ -196,14 +204,49 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
             startActivity(intent)
         }
         rightTitle.setOnClickListener {
-            val intent = Intent(this@MainActivity, ServiceListActivity::class.java)
-            startActivity(intent)
+            if (!imgSwitch.isAnimating) {
+                val intent = Intent(this@MainActivity, ServiceListActivity::class.java)
+                if (state.name == "Connected") {
+                    intent.putExtra(Constant.WHETHER_CONNECTED, true)
+                } else {
+                    intent.putExtra(Constant.WHETHER_CONNECTED, false)
+                }
+                intent.putExtra(Constant.CURRENT_IP, bestServiceData.bb_ip)
+                intent.putExtra(Constant.WHETHER_BEST_SERVER, bestServiceData.bestServer)
+
+                startActivity(intent)
+            }
         }
-        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+        radioGroup.setOnClickListener {
             imgSwitch.playAnimation()
             Timer().schedule(1000) {
                 startVpn()
             }
+        }
+        clSwitch.setOnClickListener {
+            imgSwitch.playAnimation()
+            Timer().schedule(1000) {
+                startVpn()
+            }
+        }
+    }
+
+    /**
+     * 开关状态
+     */
+    private fun setSwitchStatus() {
+        if (state.name == "Connected") {
+            radioButton0.setTextColor(getColor(R.color.white))
+            radioButton0.background = resources.getDrawable(R.drawable.radio_bg_check)
+
+            radioButton1.setTextColor(getColor(R.color.white))
+            radioButton1.background = null
+        } else {
+            radioButton1.setTextColor(getColor(R.color.white))
+            radioButton1.background = resources.getDrawable(R.drawable.radio_bg_check)
+
+            radioButton0.setTextColor(getColor(R.color.white))
+            radioButton0.background = null
         }
     }
 
@@ -225,17 +268,37 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         connection.connect(this, this)
         DataStore.publicStore.registerChangeListener(this)
         ProfileManager.getProfile(DataStore.profileId).let {
-            val bestData = findTheBestIp()
-            tvLocation.text = bestData.bb_country + "-" + bestData.bb_city
-            imgCountry.setImageResource(FlagConversion(bestData.bb_country))
+            settingsIcon(bestServiceData)
             if (it != null) {
-                ProfileManager.updateProfile(setServerData(it, bestData))
+                ProfileManager.updateProfile(setServerData(it, bestServiceData))
             } else {
                 val profile = Profile()
-                ProfileManager.createProfile(setServerData(profile, bestData))
+                ProfileManager.createProfile(setServerData(profile, bestServiceData))
             }
         }
         DataStore.profileId = 1L
+    }
+
+
+    /**
+     * 更新服务器
+     */
+    private fun updateServer(safeLocation: ProfileBean.SafeLocation) {
+        settingsIcon(safeLocation)
+        bestServiceData = safeLocation
+        ProfileManager.getProfile(DataStore.profileId).let {
+            if (it != null) {
+                setServerData(it, safeLocation)
+                ProfileManager.updateProfile(it)
+            } else {
+                ProfileManager.createProfile(Profile())
+            }
+        }
+        DataStore.profileId = 1L
+        imgSwitch.playAnimation()
+        Timer().schedule(1000) {
+            startVpn()
+        }
     }
 
     /**
@@ -251,36 +314,16 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
     }
 
     /**
-     * 更新服务器
+     * 设置图标
      */
-    private fun updateServer(safeLocation: ProfileBean.SafeLocation) {
-        if (state.name == "Connected") {
-            ToastUtils.toast(R.string.disconnect_tips)
-            return
-        }
-        checkSafeLocation = ProfileBean.SafeLocation()
-        checkSafeLocation = safeLocation
-        checkSafeLocation.bb_country.let {
-
-        }
-        if (checkSafeLocation.bestServer==true) {
+    private fun settingsIcon(profileBean: ProfileBean.SafeLocation) {
+        if (profileBean.bestServer == true) {
             tvLocation.text = Constant.FASTER_SERVER
             imgCountry.setImageResource(FlagConversion(Constant.FASTER_SERVER))
-
         } else {
-            tvLocation.text = checkSafeLocation.bb_country + "-" + checkSafeLocation.bb_city
-            imgCountry.setImageResource(FlagConversion(checkSafeLocation.bb_country))
+            tvLocation.text = profileBean.bb_country + "-" + profileBean.bb_city
+            imgCountry.setImageResource(FlagConversion(profileBean.bb_country))
         }
-        ProfileManager.getProfile(DataStore.profileId).let {
-            if (it != null) {
-                setServerData(it, safeLocation)
-                ProfileManager.updateProfile(it)
-            } else {
-                ProfileManager.createProfile(Profile())
-            }
-        }
-        DataStore.profileId = 1L
-        startVpn()
     }
 
     /**
@@ -288,21 +331,35 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
      */
     private fun startVpn() {
         if (state.canStop) {
-            Core.stopService()
-            Looper.prepare()
-            jumpToTheResultPage(false)
-            Looper.loop()
+            disConnectToTheVpnService()
         } else {
-            connect.launch(null)
+            connectToTheVpnService()
         }
     }
 
-//    /**
-//     * 启动插页广告
-//     */
-//    private fun startInterstitial() {
-//
-//    }
+    /**
+     * 断开vpn服务
+     */
+    private fun disConnectToTheVpnService() {
+        Core.stopService()
+        Looper.prepare()
+        jumpToTheResultPage(false)
+        Looper.loop()
+    }
+
+    /**
+     * 连接vpn服务
+     */
+    private fun connectToTheVpnService() {
+        if (NetworkPing.isNetworkAvailable(this)) {
+            connect.launch(null)
+        } else {
+            Looper.prepare()
+            imgSwitch.pauseAnimation()
+            ToastUtils.toast("The current device has no network")
+            Looper.loop()
+        }
+    }
 
     override fun onServiceDisconnected() = changeState(BaseService.State.Idle)
     override fun onBinderDied() {
@@ -318,6 +375,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         Log.i("TAG", "changeState: --->$state---msg=$msg")
         setConnectionStatusText(state.name)
         this.state = state
+        setSwitchStatus()
         stateListener?.invoke(state)
     }
 
@@ -330,21 +388,15 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
                 txtConnect.text = "Connecting..."
             }
             "Connected" -> {
-                if (rangeTime != 0) {
-                    timer.base = timer.base + (SystemClock.elapsedRealtime() - rangeTime);
-                } else {
-                    timer.base = SystemClock.elapsedRealtime();
-                }
-                timer.start()
+                // 连接成功
+                connectionSucceeded()
                 txtConnect.text = "Connected"
-                jumpToTheResultPage(true)
             }
             "Stopping" -> {
                 txtConnect.text = "Stopping"
             }
             "Stopped" -> {
-                timer.stop()
-                rangeTime = SystemClock.elapsedRealtime().toInt()
+                connectionStop()
                 txtConnect.text = "Connect"
             }
             else -> {
@@ -352,6 +404,29 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
             }
         }
 
+    }
+
+    /**
+     * 连接成功
+     */
+    private fun connectionSucceeded() {
+        if (rangeTime != 0f) {
+            timer.base = (timer.base + (SystemClock.elapsedRealtime() - rangeTime)).toLong()
+        } else {
+            timer.base = SystemClock.elapsedRealtime()
+        }
+        timer.start()
+        jumpToTheResultPage(true)
+    }
+
+    /**
+     * 连接停止
+     */
+    private fun connectionStop() {
+        timer.stop()
+        //计数器置空
+        rangeTime = 0f
+        timer.base = SystemClock.elapsedRealtime()
     }
 
     /**

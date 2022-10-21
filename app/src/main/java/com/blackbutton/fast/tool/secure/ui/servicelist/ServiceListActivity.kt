@@ -24,6 +24,7 @@ import com.example.testdemo.utils.KLog
 import com.github.shadowsocks.R
 import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
+import com.xuexiang.xutil.tip.ToastUtils
 
 class ServiceListActivity : AppCompatActivity() {
     private lateinit var frameLayoutTitle: FrameLayout
@@ -37,20 +38,36 @@ class ServiceListActivity : AppCompatActivity() {
     private lateinit var safeLocation: MutableList<ProfileBean.SafeLocation>
     private lateinit var checkSafeLocation: ProfileBean.SafeLocation
 
+    //选中IP
+    private var selectIp: String? = null
+
+    //whetherConnected
+    private var whetherConnected = false
     private lateinit var tvConnect: TextView
+    private var whetherBestServer = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         StatusBarUtils.translucent(this)
         StatusBarUtils.setStatusBarLightMode(this)
         setContentView(R.layout.activity_service_list)
+        initParam()
         initRecyclerView()
+    }
+
+    /**
+     * initParam
+     */
+    private fun initParam() {
+        selectIp = intent.getStringExtra(Constant.CURRENT_IP)
+        whetherConnected = intent.getBooleanExtra(Constant.WHETHER_CONNECTED, false)
+        whetherBestServer = intent.getBooleanExtra(Constant.WHETHER_BEST_SERVER, false)
     }
 
     private fun initRecyclerView() {
         frameLayoutTitle = findViewById(R.id.bar_service_list)
         frameLayoutTitle.setPadding(
             0,
-            px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat()) + 10,
+            px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat()) + 50,
             0,
             0
         )
@@ -66,6 +83,11 @@ class ServiceListActivity : AppCompatActivity() {
         blackTitle.setImageResource(R.mipmap.ic_black)
 
         storageServerData()
+        if(!whetherBestServer){
+            safeLocation.forEach {
+                it.cheek_state = it.bb_ip == selectIp
+            }
+        }
         serviceListAdapter = ServiceListAdapter(safeLocation)
         val layoutManager = LinearLayoutManager(this)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
@@ -74,6 +96,7 @@ class ServiceListActivity : AppCompatActivity() {
         clickEvent()
 
     }
+
     /**
      * 点击事件
      */
@@ -91,9 +114,13 @@ class ServiceListActivity : AppCompatActivity() {
             finish()
         }
         tvConnect.setOnClickListener {
-            checkSafeLocation.bb_country
-            LiveEventBus.get(Constant.SERVER_INFORMATION).post(checkSafeLocation)
-            finish()
+            if (whetherConnected) {
+                ToastUtils.toast(R.string.disconnect_tips)
+            } else {
+                LiveEventBus.get(Constant.SERVER_INFORMATION).post(checkSafeLocation)
+                finish()
+            }
+
         }
     }
 

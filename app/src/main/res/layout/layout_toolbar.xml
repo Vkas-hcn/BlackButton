@@ -35,7 +35,7 @@
                 android:ellipsize="end"
                 android:gravity="center"
                 android:singleLine="true"
-                android:src="@mipmap/ic_safe_moonlight"
+                android:src="@mipmap/ic_black_button"
                 android:textColor="@color/title_text" />
 
             <TextView

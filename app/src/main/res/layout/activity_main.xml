@@ -5,7 +5,7 @@
     android:id="@+id/slidingMenu"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg_nav"
+    android:background="@color/colorPrimary"
     app:rightMargin="92dp"
     tools:context="com.blackbutton.fast.tool.secure.MainActivity">
 
@@ -67,6 +67,7 @@
                 </LinearLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/cl_switch"
                     android:layout_width="match_parent"
                     android:layout_height="259dp"
                     android:layout_gravity="center"
@@ -97,7 +98,7 @@
                         app:layout_constraintTop_toTopOf="@+id/img_switch" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <RadioGroup
+                <LinearLayout
                     android:id="@+id/radio_group"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -106,18 +107,17 @@
                     android:background="@drawable/radio_group_bg"
                     android:orientation="horizontal">
 
-                    <RadioButton
+                    <TextView
                         android:id="@+id/radio_button0"
-                        style="@style/radio_group"
+                        style="@style/radio_group_false"
                         android:text="@string/on" />
 
-                    <RadioButton
+                    <TextView
                         android:id="@+id/radio_button1"
-                        style="@style/radio_group"
-                        android:checked="true"
+                        style="@style/radio_group_true"
                         android:text="@string/off" />
 
-                </RadioGroup>
+                </LinearLayout>
 
 
             </LinearLayout>
@@ -125,6 +125,7 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:layout_marginBottom="@dimen/dp20">
 
                 <com.google.android.gms.ads.AdView

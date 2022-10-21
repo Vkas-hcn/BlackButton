@@ -405,6 +405,7 @@ public final class Utils {
 
     /**
      * 进程判断
+     *
      * @param context
      * @return
      */
@@ -418,56 +419,58 @@ public final class Utils {
         }
         return true;
     }
+
     /**
      * 国旗转化
      */
     public static int FlagConversion(String bb_country) {
-        if(bb_country.contains("Faster server")){
+        if (bb_country.contains("Faster server")) {
             return R.mipmap.ic_country;
-        }else if (bb_country.contains("Japan")) {
+        } else if (bb_country.contains("Japan")) {
             return R.mipmap.japan;
-        }else if(bb_country.contains("United Kingdom")){
+        } else if (bb_country.contains("United Kingdom")) {
             return R.mipmap.unitedkingdom;
+        }  else if (bb_country.contains("United States")) {
+            return R.mipmap.unitedstates;
         }else if (bb_country.contains("Australia")) {
             return R.mipmap.australia;
-        }else if (bb_country.contains("Belgium")) {
+        } else if (bb_country.contains("Belgium")) {
             return R.mipmap.belgium;
-        }else if (bb_country.contains("Brazil")) {
+        } else if (bb_country.contains("Brazil")) {
             return R.mipmap.brazil;
-        }else if (bb_country.contains("Canada")) {
+        } else if (bb_country.contains("Canada")) {
             return R.mipmap.canada;
-        }else if (bb_country.contains("France")) {
+        } else if (bb_country.contains("France")) {
             return R.mipmap.france;
-        }else if (bb_country.contains("Germany")) {
+        } else if (bb_country.contains("Germany")) {
             return R.mipmap.germany;
-        }else if (bb_country.contains("Hongkong")) {
+        } else if (bb_country.contains("Hongkong")) {
             return R.mipmap.hongkong;
-        }else if (bb_country.contains("India")) {
+        } else if (bb_country.contains("India")) {
             return R.mipmap.india;
-        }else if (bb_country.contains("Ireland")) {
+        } else if (bb_country.contains("Ireland")) {
             return R.mipmap.ireland;
-        }
-        else if (bb_country.contains("italy")) {
+        } else if (bb_country.contains("italy")) {
             return R.mipmap.italy;
-        }else if (bb_country.contains("Koreasouth")) {
+        } else if (bb_country.contains("Koreasouth")) {
             return R.mipmap.koreasouth;
-        }else if (bb_country.contains("Netherlands")) {
+        } else if (bb_country.contains("Netherlands")) {
             return R.mipmap.netherlands;
-        }else if (bb_country.contains("Newzealand")) {
+        } else if (bb_country.contains("Newzealand")) {
             return R.mipmap.newzealand;
-        }else if (bb_country.contains("Norway")) {
+        } else if (bb_country.contains("Norway")) {
             return R.mipmap.norway;
-        }else if (bb_country.contains("Russianfederation")) {
+        } else if (bb_country.contains("Russianfederation")) {
             return R.mipmap.russianfederation;
-        }else if (bb_country.contains("Singapore")) {
+        } else if (bb_country.contains("Singapore")) {
             return R.mipmap.singapore;
-        }else if (bb_country.contains("Sweden")) {
+        } else if (bb_country.contains("Sweden")) {
             return R.mipmap.sweden;
-        }else if (bb_country.contains("Switzerland")) {
+        } else if (bb_country.contains("Switzerland")) {
             return R.mipmap.switzerland;
-        }else if (bb_country.contains("tw")) {
+        } else if (bb_country.contains("tw")) {
             return R.mipmap.tw;
-        }else {
+        } else {
             return R.mipmap.ic_country;
         }
     }

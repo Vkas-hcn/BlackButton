@@ -23,4 +23,12 @@ object Constant {
     const val SHARE_ADDRESS="https://play.google.com/store/apps/details?id="
     // Faster server
     const val FASTER_SERVER= "Faster server"
+    // bestData
+    const val BEST_SERVICE_DATA="bestServiceData"
+    // 是否已连接
+    const val WHETHER_CONNECTED="whetherConnected"
+    // 当前IP
+    const val CURRENT_IP="currentIp"
+    // 是否最佳服务器
+    const val WHETHER_BEST_SERVER="whetherBestServer"
 }

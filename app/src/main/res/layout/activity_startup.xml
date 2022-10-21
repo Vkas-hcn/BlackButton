@@ -32,7 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dp16"
-                android:src="@mipmap/ic_safe_moonlight" />
+                android:src="@mipmap/ic_black_button" />
 
         </LinearLayout>
     </FrameLayout>
@@ -41,7 +41,7 @@
     <com.blackbutton.fast.tool.secure.widget.HorizontalProgressView
         android:id="@+id/pb_start"
         android:layout_width="210dp"
-        android:layout_height="30dp"
+        android:layout_height="10dp"
         app:hpv_end_color="@color/colorAccent"
         app:hpv_end_progress="92"
         app:hpv_isTracked="true"
@@ -50,6 +50,7 @@
         app:hpv_progress_textVisibility="false"
         app:hpv_start_color="@color/colorAccent"
         app:hpv_track_color="#EEEEEE"
+        app:hpv_track_width="@dimen/dp5"
         app:hpv_corner_radius="@dimen/dp10"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"

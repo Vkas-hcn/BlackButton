@@ -31,7 +31,8 @@ import java.util.*
 class StartupActivity : AppCompatActivity(),
     HorizontalProgressView.HorizontalProgressUpdateListener {
     private lateinit var horizontalProgressView: HorizontalProgressView
-
+    private val timer = Timer()
+    private val timerTask: TimerTask = HomeTimerTask()
     // 绕流数据
     private lateinit var aroundFlowData: AroundFlowBean
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,9 +49,7 @@ class StartupActivity : AppCompatActivity(),
         horizontalProgressView.startProgressAnimation()
         aroundFlowData = AroundFlowBean()
         getFirebaseData()
-        val timer = Timer()
-        val timerTask: TimerTask = HomeTimerTask()
-        timer.schedule(timerTask, 2000)
+
         LiveEventBus
             .get("JUMP_PAGE", Boolean::class.java)
             .observeForever {
@@ -63,6 +62,7 @@ class StartupActivity : AppCompatActivity(),
      * 获取Firebase数据
      */
     private fun getFirebaseData() {
+        timer.schedule(timerTask, 2000)
         if (BuildConfig.DEBUG) {
             return
         }
@@ -89,6 +89,9 @@ class StartupActivity : AppCompatActivity(),
      */
     private fun jumpPage() {
         val intent = Intent(this@StartupActivity, MainActivity::class.java)
+        val bestData = findTheBestIp()
+        val dataJson = JsonUtil.toJson(bestData)
+        intent.putExtra(Constant.BEST_SERVICE_DATA, dataJson)
         startActivity(intent)
     }
 
@@ -100,7 +103,6 @@ class StartupActivity : AppCompatActivity(),
         super.onDestroy()
         horizontalProgressView.stopProgressAnimation()
         horizontalProgressView.setProgressViewUpdateListener(null)
-        NetworkPing.pingCancle()
     }
 
     override fun onHorizontalProgressStart(view: View?) {

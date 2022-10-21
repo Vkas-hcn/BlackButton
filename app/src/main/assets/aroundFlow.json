@@ -1,9 +1,17 @@
 {
   "around_flow_mode": "1",
   "black_list": [
-    "com.microsoft.emmx","com.xuexiang.xuidemo"
+    "com.UCMobile"
   ],
   "white_list": [
-    "com.android.browser"
+    "com.android.chrome",
+    "com.microsoft.emmx",
+    "org.mozilla.firefox",
+    "com.opera.browser",
+    "com.google.android.googlequicksearchbox",
+    "mark.via.gp",
+    "com.UCMobile.intl",
+    "com.brave.browser",
+    "privacy.explorer.fast.safe.browser"
   ]
 }

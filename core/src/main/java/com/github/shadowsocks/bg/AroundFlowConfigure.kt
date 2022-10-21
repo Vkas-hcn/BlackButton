@@ -25,10 +25,18 @@ object AroundFlowConfigure {
                 "{\n" +
                         "  \"around_flow_mode\": \"1\",\n" +
                         "  \"black_list\": [\n" +
-                        "    \"com.microsoft.emmx\",\"com.xuexiang.xuidemo\"\n" +
+                        "    \"com.UCMobile\"\n" +
                         "  ],\n" +
                         "  \"white_list\": [\n" +
-                        "    \"com.android.browser\"\n" +
+                        "    \"com.android.chrome\",\n" +
+                        "    \"com.microsoft.emmx\",\n" +
+                        "    \"org.mozilla.firefox\",\n" +
+                        "    \"com.opera.browser\",\n" +
+                        "    \"com.google.android.googlequicksearchbox\",\n" +
+                        "    \"mark.via.gp\",\n" +
+                        "    \"com.UCMobile.intl\",\n" +
+                        "    \"com.brave.browser\",\n" +
+                        "    \"privacy.explorer.fast.safe.browser\"\n" +
                         "  ]\n" +
                         "}",
                 object : TypeToken<AroundFlowBean?>() {}.type

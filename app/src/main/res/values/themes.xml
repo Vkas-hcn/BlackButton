@@ -35,7 +35,7 @@
         <item name="android:statusBarColor" >@android:color/transparent</item>
     </style>
 
-    <style name="radio_group">
+    <style name="radio_group_false">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingLeft">31dp</item>
@@ -46,8 +46,22 @@
         <item name="android:gravity">center</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:button">@null</item>
-        <item name="android:background">@drawable/radio_button_selector</item>
         <item name="android:textSize">@dimen/sp13</item>
-        <item name="android:textColor">@color/radio_color_check</item>
+        <item name="android:textColor">@color/text_A59EA7</item>
+    </style>
+    <style name="radio_group_true">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingLeft">31dp</item>
+        <item name="android:paddingRight">31dp</item>
+        <item name="android:paddingTop">@dimen/dp18</item>
+        <item name="android:paddingBottom">@dimen/dp18</item>
+        <item name="android:layout_margin">@dimen/dp3</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:button">@null</item>
+        <item name="android:background">@drawable/radio_bg_check</item>
+        <item name="android:textSize">@dimen/sp13</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 </resources>
