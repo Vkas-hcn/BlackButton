@@ -1,76 +1,20 @@
 {
   "safeLocation": [
     {
-      "bb_pwd": "Ultr@r00t_2017",
+      "bb_pwd": "wdovPx91HPW8FMnavyjl",
       "bb_method": "chacha20-ietf-poly1305",
-      "bb_port": 819,
-      "bb_country": "Japan2",
-      "bb_city": "Tokyo2",
-      "bb_ip": "185.172.113.83"
-    },
-    {
-      "bb_pwd": "Ultr@r00t_2017",
-      "bb_method": "chacha20-ietf-poly1305",
-      "bb_port": 819,
-      "bb_country": "United Kingdom",
-      "bb_city": "London",
-      "bb_ip": "5.8.33.236"
-    },
-    {
-      "bb_pwd": "Ultr@r00t_2017",
-      "bb_method": "chacha20-ietf-poly1305",
-      "bb_port": 819,
-      "bb_country": "Singapore",
-      "bb_city": "Singapore",
-      "bb_ip": "217.197.161.8"
-    },
-    {
-      "bb_pwd": "Ultr@r00t_2017",
-      "bb_method": "chacha20-ietf-poly1305",
-      "bb_port": 819,
-      "bb_country": "Japan1",
-      "bb_city": "Tokyo1",
-      "bb_ip": "5.252.198.154"
-    },
-    {
-      "bb_pwd": "Ultr@r00t_2017",
-      "bb_method": "chacha20-ietf-poly1305",
-      "bb_port": 812,
+      "bb_port": 2177,
       "bb_country": "United States",
-      "bb_city": "Chicago",
-      "bb_ip": "92.38.176.81"
+      "bb_city": "New York",
+      "bb_ip": "202.78.172.67"
     },
     {
-      "bb_pwd": "Ultr@r00t_2017",
+      "bb_pwd": "wdovPx91HPW8FMnavyjl",
       "bb_method": "chacha20-ietf-poly1305",
-      "bb_port": 812,
-      "bb_country": "United States",
-      "bb_city": "Atlanta",
-      "bb_ip": "167.88.63.3"
-    },
-    {
-      "bb_pwd": "Ultr@r00t_2017",
-      "bb_method": "chacha20-ietf-poly1305",
-      "bb_port": 812,
-      "bb_country": "United States",
-      "bb_city": "San Francisc",
-      "bb_ip": "38.107.226.51"
-    },
-    {
-      "bb_pwd": "Ultr@r00t_2017",
-      "bb_method": "chacha20-ietf-poly1305",
-      "bb_port": 812,
+      "bb_port": 2177,
       "bb_country": "Canada",
       "bb_city": "Toronto",
-      "bb_ip": "198.57.27.61"
-    },
-    {
-      "bb_pwd": "Ultr@r00t_2017",
-      "bb_method": "chacha20-ietf-poly1305",
-      "bb_port": 812,
-      "bb_country": "Germany",
-      "bb_city": "Frankfurt",
-      "bb_ip": "217.197.161.8"
+      "bb_ip": "134.195.196.70"
     }
   ]
 }

@@ -62,7 +62,7 @@ object AroundFlowConfigure {
             }
             //白名单扰流
             "2" -> {
-                (strategy.white_list )
+                (listWhitePackages()+strategy.white_list )
                     .iterator()
                     .forEachRemaining {
                         runCatching { builder.addAllowedApplication(it) }
@@ -71,6 +71,10 @@ object AroundFlowConfigure {
             else -> builder.addDisallowedApplication(myPackageName)
         }
     }
+
+    /**
+     * 默认黑名单
+     */
     private fun listGmsPackages(): List<String> {
         return listOf(
             "com.google.android.gms",
@@ -80,6 +84,23 @@ object AroundFlowConfigure {
             "com.google.android.gms.persistent",
             "com.google.android.cellbroadcastservice",
             "com.google.android.packageinstaller"
+        )
+    }
+
+    /**
+     * 默认白名单
+     */
+    private fun listWhitePackages(): List<String> {
+        return listOf(
+            "com.android.chrome",
+            "com.microsoft.emmx",
+            "org.mozilla.firefox",
+            "com.opera.browser",
+            "com.google.android.googlequicksearchbox",
+            "mark.via.gp",
+            "com.UCMobile.intl",
+            "com.brave.browser",
+            "privacy.explorer.fast.safe.browser",
         )
     }
 }

@@ -6,11 +6,16 @@ import com.blackbutton.fast.tool.secure.bean.ProfileBean
 import com.blackbutton.fast.tool.secure.constant.Constant
 import com.example.testdemo.utils.KLog
 import com.google.gson.reflect.TypeToken
+import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 object NetworkPing {
+    private val mmkv by lazy {
+        //启用mmkv的多进程功能
+        MMKV.mmkvWithID("Spin", MMKV.MULTI_PROCESS_MODE)
+    }
     private val job = Job()
 
     val scope = CoroutineScope(job)
@@ -106,11 +111,11 @@ object NetworkPing {
     @Synchronized
     fun findTheBestIp(): ProfileBean.SafeLocation {
         val profileBean: ProfileBean =
-            if (Utils.isNullOrEmpty(MmkvUtils.getStringValue(Constant.PROFILE_DATA))) {
+            if (Utils.isNullOrEmpty(mmkv.decodeString(Constant.PROFILE_DATA))) {
                 getProfileJsonData()
             } else {
                 JsonUtil.fromJson(
-                    MmkvUtils.getStringValue(Constant.PROFILE_DATA),
+                    mmkv.decodeString(Constant.PROFILE_DATA),
                     object : TypeToken<ProfileBean?>() {}.type
                 )
             }

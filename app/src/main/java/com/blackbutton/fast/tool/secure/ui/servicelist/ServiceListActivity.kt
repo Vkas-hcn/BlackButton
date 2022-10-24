@@ -1,30 +1,31 @@
 package com.blackbutton.fast.tool.secure.ui.servicelist
 
+import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.blackbutton.fast.tool.secure.constant.Constant
-import com.blackbutton.fast.tool.secure.utils.JsonUtil
-import com.blackbutton.fast.tool.secure.utils.ResourceUtils.readStringFromAssert
 import com.blackbutton.fast.tool.secure.bean.ProfileBean
-import com.blackbutton.fast.tool.secure.utils.DensityUtils.dp2px
+import com.blackbutton.fast.tool.secure.constant.Constant
 import com.blackbutton.fast.tool.secure.utils.DensityUtils.px2dp
-import com.blackbutton.fast.tool.secure.utils.MmkvUtils
+import com.blackbutton.fast.tool.secure.utils.JsonUtil
 import com.blackbutton.fast.tool.secure.utils.NetworkPing
+import com.blackbutton.fast.tool.secure.utils.ResourceUtils.readStringFromAssert
 import com.blackbutton.fast.tool.secure.utils.StatusBarUtils
 import com.blackbutton.fast.tool.secure.utils.Utils.addTheBestRoute
 import com.blackbutton.fast.tool.secure.utils.Utils.isNullOrEmpty
-import com.example.testdemo.utils.KLog
 import com.github.shadowsocks.R
 import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
+import com.tencent.mmkv.MMKV
 import com.xuexiang.xutil.tip.ToastUtils
+
 
 class ServiceListActivity : AppCompatActivity() {
     private lateinit var frameLayoutTitle: FrameLayout
@@ -37,14 +38,16 @@ class ServiceListActivity : AppCompatActivity() {
     private lateinit var profileBean: ProfileBean
     private lateinit var safeLocation: MutableList<ProfileBean.SafeLocation>
     private lateinit var checkSafeLocation: ProfileBean.SafeLocation
-
     //选中IP
     private var selectIp: String? = null
-
     //whetherConnected
     private var whetherConnected = false
     private lateinit var tvConnect: TextView
     private var whetherBestServer = false
+    private val mmkv by lazy {
+        //启用mmkv的多进程功能
+        MMKV.mmkvWithID("Spin", MMKV.MULTI_PROCESS_MODE)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         StatusBarUtils.translucent(this)
@@ -94,7 +97,6 @@ class ServiceListActivity : AppCompatActivity() {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = serviceListAdapter
         clickEvent()
-
     }
 
     /**
@@ -115,7 +117,7 @@ class ServiceListActivity : AppCompatActivity() {
         }
         tvConnect.setOnClickListener {
             if (whetherConnected) {
-                ToastUtils.toast(R.string.disconnect_tips)
+                disconnectDialogBox()
             } else {
                 LiveEventBus.get(Constant.SERVER_INFORMATION).post(checkSafeLocation)
                 finish()
@@ -123,7 +125,24 @@ class ServiceListActivity : AppCompatActivity() {
 
         }
     }
+    /**
+     * 断开连接对话框
+     */
+    private fun disconnectDialogBox(){
+        val dialog: android.app.AlertDialog? = android.app.AlertDialog.Builder(this)
+            .setTitle("Are you sure to disconnect current server")
+            //设置对话框的按钮
+            .setNegativeButton("CANCEL") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton("DISCONNECT") { dialog, _ ->
+                dialog.dismiss()
+                LiveEventBus.get(Constant.SERVER_INFORMATION).post(checkSafeLocation)
+                finish()
+            }.create()
+        dialog?.show()
 
+    }
     /**
      * 存储服务器数据
      */
@@ -131,11 +150,11 @@ class ServiceListActivity : AppCompatActivity() {
         safeLocation = ArrayList()
         profileBean = ProfileBean()
         checkSafeLocation = ProfileBean.SafeLocation()
-        profileBean = if (isNullOrEmpty(MmkvUtils.getStringValue(Constant.PROFILE_DATA))) {
+        profileBean = if (isNullOrEmpty(mmkv.decodeString(Constant.PROFILE_DATA))) {
             getMenuJsonData("serviceJson.json")
         } else {
             JsonUtil.fromJson(
-                MmkvUtils.getStringValue(Constant.PROFILE_DATA),
+                mmkv.decodeString(Constant.PROFILE_DATA),
                 object : TypeToken<ProfileBean?>() {}.type
             )
         }

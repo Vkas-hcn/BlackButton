@@ -11,6 +11,8 @@ object Constant {
     const val JUMP_PAGE = "jumpPage"
     //服务器信息
     const val SERVER_INFORMATION = "serverInformation"
+    //滑动
+    const val SLIDING = "sliding"
     //连接状态
     const val CONNECTION_STATUS = "connectionStatus"
     //绕流数据

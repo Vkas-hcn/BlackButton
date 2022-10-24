@@ -19,6 +19,7 @@ import com.google.firebase.ktx.initialize
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
+import com.xuexiang.xutil.tip.ToastUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -33,6 +34,7 @@ class StartupActivity : AppCompatActivity(),
     private lateinit var horizontalProgressView: HorizontalProgressView
     private val timer = Timer()
     private val timerTask: TimerTask = HomeTimerTask()
+
     // 绕流数据
     private lateinit var aroundFlowData: AroundFlowBean
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,21 +57,24 @@ class StartupActivity : AppCompatActivity(),
             .observeForever {
                 jumpPage()
             }
-
     }
 
     /**
      * 获取Firebase数据
      */
     private fun getFirebaseData() {
-        timer.schedule(timerTask, 2000)
         if (BuildConfig.DEBUG) {
+            timer.schedule(timerTask, 2000)
             return
-        }
-        val auth = Firebase.remoteConfig
-        auth.fetchAndActivate().addOnSuccessListener {
-            MmkvUtils.set(Constant.AROUND_FLOW_DATA, auth.getString("aroundFlowData"))
-            MmkvUtils.set(Constant.PROFILE_DATA, auth.getString("profileData"))
+        } else {
+            val auth = Firebase.remoteConfig
+            auth.fetchAndActivate().addOnSuccessListener {
+                ToastUtils.toast("fireBase Connection succeeded")
+                MmkvUtils.set(Constant.AROUND_FLOW_DATA, auth.getString("aroundFlowData"))
+                MmkvUtils.set(Constant.PROFILE_DATA, auth.getString("profileData"))
+            }.addOnCompleteListener {
+                timer.schedule(timerTask, 2000)
+            }
         }
     }
 
@@ -91,7 +96,7 @@ class StartupActivity : AppCompatActivity(),
         val intent = Intent(this@StartupActivity, MainActivity::class.java)
         val bestData = findTheBestIp()
         val dataJson = JsonUtil.toJson(bestData)
-        intent.putExtra(Constant.BEST_SERVICE_DATA, dataJson)
+        MmkvUtils.set(Constant.BEST_SERVICE_DATA, dataJson)
         startActivity(intent)
     }
 

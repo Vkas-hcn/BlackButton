@@ -8,6 +8,7 @@ import android.os.RemoteException
 import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -19,10 +20,8 @@ import com.blackbutton.fast.tool.secure.ui.ResultsActivity
 import com.blackbutton.fast.tool.secure.ui.agreement.AgreementWebView
 import com.blackbutton.fast.tool.secure.ui.servicelist.ServiceListActivity
 import com.blackbutton.fast.tool.secure.utils.*
-import com.blackbutton.fast.tool.secure.utils.NetworkPing.findTheBestIp
 import com.blackbutton.fast.tool.secure.utils.Utils.FlagConversion
 import com.blackbutton.fast.tool.secure.widget.SlidingMenu
-import com.example.testdemo.utils.KLog
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.IShadowsocksService
@@ -42,6 +41,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
+import com.tencent.mmkv.MMKV
 import com.xuexiang.xutil.XUtil
 import com.xuexiang.xutil.common.ClickUtils
 import com.xuexiang.xutil.tip.ToastUtils
@@ -78,13 +78,19 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
     private val connection = ShadowsocksConnection(true)
     private var rangeTime = 0f
     private lateinit var bestServiceData: ProfileBean.SafeLocation
+    private var isFrontDesk = false
+    private val mmkv by lazy {
+        //启用mmkv的多进程功能
+        MMKV.mmkvWithID("Spin", MMKV.MULTI_PROCESS_MODE)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         StatusBarUtils.translucent(this)
         StatusBarUtils.setStatusBarLightMode(this)
         setContentView(R.layout.activity_main)
         initParam()
-        initAd()
+//        initAd()
         initView()
         clickEvent()
         timerSet()
@@ -104,7 +110,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
      */
     private fun initParam() {
         bestServiceData = JsonUtil.fromJson(
-            intent.getStringExtra(Constant.BEST_SERVICE_DATA),
+            mmkv.decodeString(Constant.BEST_SERVICE_DATA),
             object : TypeToken<ProfileBean.SafeLocation?>() {}.type
         )
     }
@@ -183,7 +189,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
      */
     private fun clickEvent() {
         navigation.setOnClickListener {
-            slidingMenu.open()
+            if (!imgSwitch.isAnimating) {
+                slidingMenu.open()
+            }
         }
         tvContact.setOnClickListener {
             val uri = Uri.parse("mailto:vkas@qq.com")
@@ -218,16 +226,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
             }
         }
         radioGroup.setOnClickListener {
-            imgSwitch.playAnimation()
-            Timer().schedule(1000) {
-                startVpn()
-            }
+            manuallyStartTheService()
         }
         clSwitch.setOnClickListener {
-            imgSwitch.playAnimation()
-            Timer().schedule(1000) {
-                startVpn()
-            }
+            manuallyStartTheService()
         }
     }
 
@@ -258,7 +260,16 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         val hour = ((SystemClock.elapsedRealtime() - timer.base) / 1000 / 60)
         timer.format = "0$hour:%s"
     }
-
+    /**
+     * 手动开启服务
+     */
+    private fun manuallyStartTheService(){
+        imgSwitch.playAnimation()
+        MmkvUtils.set(Constant.SLIDING, true)
+        Timer().schedule(1000) {
+                startVpn()
+        }
+    }
 
     /**
      * 初始连接服务器
@@ -295,10 +306,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
             }
         }
         DataStore.profileId = 1L
-        imgSwitch.playAnimation()
-        Timer().schedule(1000) {
-            startVpn()
-        }
+        isFrontDesk =true
+        manuallyStartTheService()
     }
 
     /**
@@ -434,6 +443,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
      */
     private fun jumpToTheResultPage(flag: Boolean) {
         imgSwitch.pauseAnimation()
+        MmkvUtils.set(Constant.SLIDING, false)
+        if (!isFrontDesk) {
+            setSwitchStatus()
+            return
+        }
         val intent = Intent(this@MainActivity, ResultsActivity::class.java)
         intent.putExtra(Constant.CONNECTION_STATUS, flag)
         startActivity(intent)
@@ -462,6 +476,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
     override fun onStart() {
         super.onStart()
         connection.bandwidthTimeout = 500
+        isFrontDesk = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isFrontDesk = true
     }
 
     override fun onStop() {
@@ -484,6 +504,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
 
     override fun onPause() {
         super.onPause()
+        isFrontDesk = false
     }
 
     override fun onRetry() {
