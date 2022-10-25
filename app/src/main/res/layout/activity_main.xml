@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     app:rightMargin="92dp"
-    tools:context="com.blackbutton.fast.tool.secure.MainActivity">
+    tools:context="com.blackbutton.fast.tool.secure.ui.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

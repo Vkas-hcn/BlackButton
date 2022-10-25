@@ -34,7 +34,7 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-2174740078812392~7263824144" />
 
-        <activity android:name="com.blackbutton.fast.tool.secure.MainActivity"
+        <activity android:name="com.blackbutton.fast.tool.secure.ui.MainActivity"
             android:launchMode="singleTask"/>
         <activity android:name="com.blackbutton.fast.tool.secure.ui.servicelist.ServiceListActivity" />
         <activity

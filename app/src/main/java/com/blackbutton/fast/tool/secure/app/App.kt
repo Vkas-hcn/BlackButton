@@ -23,7 +23,7 @@ package com.blackbutton.fast.tool.secure.app
 import android.app.Application
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatDelegate
-import com.blackbutton.fast.tool.secure.MainActivity
+import com.blackbutton.fast.tool.secure.ui.MainActivity
 import com.blackbutton.fast.tool.secure.utils.ResUtils
 import com.blackbutton.fast.tool.secure.utils.Utils
 import com.example.testdemo.utils.KLog

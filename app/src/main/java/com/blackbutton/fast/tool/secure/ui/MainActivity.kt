@@ -1,4 +1,4 @@
-package com.blackbutton.fast.tool.secure
+package com.blackbutton.fast.tool.secure.ui
 
 import android.content.Intent
 import android.net.Uri
@@ -8,7 +8,6 @@ import android.os.RemoteException
 import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
-import android.view.MotionEvent
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -16,7 +15,6 @@ import androidx.preference.PreferenceDataStore
 import com.airbnb.lottie.LottieAnimationView
 import com.blackbutton.fast.tool.secure.bean.ProfileBean
 import com.blackbutton.fast.tool.secure.constant.Constant
-import com.blackbutton.fast.tool.secure.ui.ResultsActivity
 import com.blackbutton.fast.tool.secure.ui.agreement.AgreementWebView
 import com.blackbutton.fast.tool.secure.ui.servicelist.ServiceListActivity
 import com.blackbutton.fast.tool.secure.utils.*
@@ -194,10 +192,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
             }
         }
         tvContact.setOnClickListener {
-            val uri = Uri.parse("mailto:vkas@qq.com")
+            val uri = Uri.parse("mailto:${Constant.MAILBOX_ADDRESS}")
             val intent = Intent(Intent.ACTION_SENDTO, uri)
-            intent.putExtra(Intent.EXTRA_SUBJECT, "") // 主题
-            intent.putExtra(Intent.EXTRA_TEXT, "") // 正文
             startActivity(Intent.createChooser(intent, "Please select mail application"))
         }
         tvAgreement.setOnClickListener {

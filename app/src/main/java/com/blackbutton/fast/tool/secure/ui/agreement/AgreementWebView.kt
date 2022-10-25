@@ -7,27 +7,63 @@ import android.net.http.SslError
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.KeyEvent
+import android.view.View
 import android.view.ViewGroup
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.blackbutton.fast.tool.secure.constant.Constant
+import com.blackbutton.fast.tool.secure.utils.DensityUtils
+import com.blackbutton.fast.tool.secure.utils.StatusBarUtils
 import com.github.shadowsocks.R
 
 
-class AgreementWebView:AppCompatActivity() {
+class AgreementWebView : AppCompatActivity() {
     private lateinit var webView: WebView
+
+    private lateinit var frameLayoutTitle: FrameLayout
+    private lateinit var blackTitle: ImageView
+    private lateinit var imgTitle: ImageView
+    private lateinit var tvTitle: TextView
+    private lateinit var ivRight: ImageView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        StatusBarUtils.translucent(this)
+        StatusBarUtils.setStatusBarLightMode(this)
         setContentView(R.layout.activity_webview)
+        supportActionBar?.hide()
+        initView()
         initWebView()
     }
 
-    private fun initWebView() {
-         webView = findViewById(R.id.agreement_web)
-        webView.loadUrl("https://www.baidu.com/")
+    private fun initView() {
+        webView = findViewById(R.id.agreement_web)
+        frameLayoutTitle = findViewById(R.id.bar_webview_list)
+        frameLayoutTitle.setPadding(
+            0,
+            DensityUtils.px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat()) + 50, 0, 0
+        )
+        blackTitle = frameLayoutTitle.findViewById(R.id.ivBack)
+        imgTitle = frameLayoutTitle.findViewById(R.id.img_title)
+        tvTitle = frameLayoutTitle.findViewById(R.id.tv_title)
+        ivRight = frameLayoutTitle.findViewById(R.id.ivRight)
+        imgTitle.visibility = View.GONE
+        tvTitle.visibility = View.VISIBLE
+        ivRight.visibility = View.GONE
+        tvTitle.text = getString(R.string.privacy_agreement)
+        blackTitle.setImageResource(R.mipmap.ic_black)
+        blackTitle.setOnClickListener {
+            finish()
+        }
+    }
 
+    private fun initWebView() {
+        webView.loadUrl(Constant.PRIVACY_AGREEMENT)
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
                 view.loadUrl(url)

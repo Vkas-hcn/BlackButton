@@ -5,25 +5,17 @@ import android.os.Bundle
 import android.os.Looper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.blackbutton.fast.tool.secure.MainActivity
 import com.github.shadowsocks.bean.AroundFlowBean
 import com.blackbutton.fast.tool.secure.constant.Constant
 import com.blackbutton.fast.tool.secure.utils.*
 import com.blackbutton.fast.tool.secure.utils.NetworkPing.findTheBestIp
 import com.blackbutton.fast.tool.secure.widget.HorizontalProgressView
-import com.example.testdemo.utils.KLog
 import com.github.shadowsocks.BuildConfig
 import com.github.shadowsocks.R
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.initialize
 import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.xuexiang.xutil.tip.ToastUtils
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.util.*
 
 /**

@@ -10,6 +10,7 @@ import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import kotlin.system.measureTimeMillis
 
 object NetworkPing {
     private val mmkv by lazy {
@@ -31,7 +32,6 @@ object NetworkPing {
         val proc = Runtime.getRuntime().exec(command)
         val reader = BufferedReader(InputStreamReader(proc.inputStream))
         var time = ""
-        flag = false
         when (proc.waitFor()) {
             0 -> {
                 val result = StringBuilder()
@@ -44,55 +44,56 @@ object NetworkPing {
                 }
             }
             else -> {
-                // 只要是没有ping通,肯定是有原因
+                // 没有ping通
                 // 网络权限,ip地址,命令有误 等
+                time = "0"
             }
         }
-        flag = true
+
         return time
     }
 
-    fun ping2(
+    /**
+     * @param count ping这个ip几次 默认1次
+     * @param outTime ping完之后多久超时 默认3秒
+     * @param ip 默认ping百度的地址
+     * @param needPingMesssage 是否需要ping的过程中的消息
+     * @param pingMessage 返回需要ping的消息 如果想要消息则首先打开 [needPingMesssage]
+     * @param pingSuccess 返回ping的状态
+     */
+    fun ping(
+        count: Int = 1,
+        outTime: Int = 1,
         ip: String = "www.baidu.com",
         whileTime: Long = 1500,
-        pingMessage: (String) -> Unit = { _ -> },
-        pingSuccess: (Boolean) -> Unit
+        pingMessage: (String) -> Unit = { _ -> }
     ) {
         scope.launch {
-            flag = false
-            val command = "ping -c 1 -W 1 $ip"
+            val command = "ping -c $count -W $outTime $ip"
             while (true) {
                 // 每[whileTime]s去 ping一次地址
                 delay(whileTime)
-                val proc = withContext(Dispatchers.IO) {
-                    Runtime.getRuntime().exec(command)
-                }
+                val proc = Runtime.getRuntime().exec(command)
                 val reader = BufferedReader(InputStreamReader(proc.inputStream))
-                when (withContext(Dispatchers.IO) {
-                    proc.waitFor()
-                }) {
+                when (proc.waitFor()) {
                     0 -> {
                         // 等价 pingSuccess(true)
-                        pingSuccess.invoke(true)
                         val result = StringBuilder()
                         while (true) {
-                            val line =
-                                withContext(Dispatchers.IO) {
-                                    reader.readLine()
-                                } ?: break
+                            val line = reader.readLine() ?: break
                             result.append(line).append("\n")
                         }
                         result.toString().let {
-                            pingMessage(it.substring(it.indexOf("time=") + 5))
-                            flag = true
-
+                            pingMessage.invoke(it.substring(it.indexOf("time=") + 5))
+                            pingCancle()
                         }
 
                     }
                     else -> {
                         // 只要是没有ping通,肯定是有原因
                         // 网络权限,ip地址,命令有误 等
-                        pingSuccess.invoke(false)
+//                        pingSuccess.invoke(false)
+                        pingMessage.invoke("-1")
                         pingCancle()
                     }
                 }
@@ -100,6 +101,7 @@ object NetworkPing {
 
         }
     }
+
     // 关闭当前的协程
     fun pingCancle() {
         scope.cancel()
@@ -108,7 +110,6 @@ object NetworkPing {
     /**
      * 找到最佳ip
      */
-    @Synchronized
     fun findTheBestIp(): ProfileBean.SafeLocation {
         val profileBean: ProfileBean =
             if (Utils.isNullOrEmpty(mmkv.decodeString(Constant.PROFILE_DATA))) {
@@ -120,19 +121,16 @@ object NetworkPing {
                 )
             }
         profileBean.safeLocation?.shuffled()?.take(1)?.forEach {
-            it.bestServer =true
+            it.bestServer = true
             return it
         }
         profileBean.safeLocation!![0].bestServer = true
         return profileBean.safeLocation[0]
     }
     /**
-     *
-     */
-    /**
      * @return 解析json文件
      */
-    fun getProfileJsonData(): ProfileBean {
+    private fun getProfileJsonData(): ProfileBean {
         return JsonUtil.fromJson(
             ResourceUtils.readStringFromAssert("serviceJson.json"),
             object : TypeToken<ProfileBean?>() {}.type
@@ -165,7 +163,8 @@ object NetworkPing {
      */
     fun isNetworkAvailable(context: Context?): Boolean {
         val manager = context!!.applicationContext.getSystemService(
-            Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            Context.CONNECTIVITY_SERVICE
+        ) as ConnectivityManager
         val info = manager.activeNetworkInfo
         return !(null == info || !info.isAvailable)
     }

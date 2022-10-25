@@ -33,4 +33,8 @@ object Constant {
     const val CURRENT_IP="currentIp"
     // 是否最佳服务器
     const val WHETHER_BEST_SERVER="whetherBestServer"
+    // privacy_agreement
+    const val PRIVACY_AGREEMENT="https://www.baidu.com/"
+    // email
+    const val MAILBOX_ADDRESS="vkas@qq.com"
 }
