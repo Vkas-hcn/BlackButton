@@ -17,6 +17,6 @@
     <string name="connected_succeeded" translatable="false">Connected succeeded</string>
     <string name="disconnected_succeeded" translatable="false">Disconnected succeeded</string>
     <string name="disconnect_tips" translatable="false">Please disconnect the previous link</string>
-    <string name="network_tips" tools:ignore="ExtraTranslation">The current device has no network</string>
-
+    <string name="network_tips" translatable="false">The current device has no network</string>
+    <string name="ad_attribution" translatable="false">Ad</string>
 </resources>

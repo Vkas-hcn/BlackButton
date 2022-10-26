@@ -85,7 +85,7 @@ class AgreementWebView : AppCompatActivity() {
             }
         }
 
-        webView.setWebViewClient(object : WebViewClient() {
+        webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView,
                 request: WebResourceRequest
@@ -112,7 +112,7 @@ class AgreementWebView : AppCompatActivity() {
                     true
                 }
             }
-        })
+        }
     }
 
     //点击返回上一页面而不是退出浏览器
