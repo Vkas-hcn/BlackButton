@@ -20,8 +20,8 @@ import com.blackbutton.fast.tool.secure.utils.*
 import com.blackbutton.fast.tool.secure.utils.Utils.FlagConversion
 import com.blackbutton.fast.tool.secure.widget.SlidingMenu
 import com.example.testdemo.utils.KLog
+import com.first.conn.R
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.bg.BaseService
@@ -58,7 +58,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
     private lateinit var timer: Chronometer
     private lateinit var imgCountry: ImageView
     private lateinit var tvLocation: TextView
-    private lateinit var mAdView: AdView
     private lateinit var slidingMenu: SlidingMenu
     private lateinit var laHomeMenu: RelativeLayout
     private lateinit var tvContact: TextView
@@ -69,7 +68,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
     private lateinit var radioButton1: TextView
     private lateinit var clSwitch: ConstraintLayout
     private var mInterstitialAd: InterstitialAd? = null
-    private lateinit var mNativeAds: AdLoader.Builder
+    private lateinit var mNativeAds: AdLoader
     private lateinit var adRequest: AdRequest
     var state = BaseService.State.Idle
     private val connection = ShadowsocksConnection(true)
@@ -81,6 +80,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         MMKV.mmkvWithID("Spin", MMKV.MULTI_PROCESS_MODE)
     }
     private lateinit var ad_frame: FrameLayout
+    private lateinit var adImg: ImageView
     var currentNativeAd: NativeAd? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,9 +92,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         StatusBarUtils.setStatusBarLightMode(this)
         setContentView(R.layout.activity_main)
         initParam()
+        initView()
         initAd()
         initNativeAds()
-        initView()
         clickEvent()
         timerSet()
         initConnectionServer()
@@ -118,6 +118,32 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         )
     }
 
+    private fun initView() {
+        frameLayoutTitle = findViewById(R.id.main_title)
+        frameLayoutTitle.setPadding(
+            0,
+            DensityUtils.px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat()) + 50, 0, 0
+        )
+        timer = findViewById(R.id.timer)
+        imgSwitch = findViewById(R.id.img_switch)
+        txtConnect = findViewById(R.id.txt_connect)
+        imgCountry = findViewById(R.id.img_country)
+        tvLocation = findViewById(R.id.tv_location)
+        radioGroup = findViewById(R.id.radio_group)
+        radioButton0 = findViewById(R.id.radio_button0)
+        radioButton1 = findViewById(R.id.radio_button1)
+        rightTitle = frameLayoutTitle.findViewById(R.id.ivRight)
+        navigation = frameLayoutTitle.findViewById(R.id.ivBack)
+        slidingMenu = findViewById(R.id.slidingMenu)
+        laHomeMenu = findViewById(R.id.la_home_menu)
+        tvContact = laHomeMenu.findViewById(R.id.tv_contact)
+        tvAgreement = laHomeMenu.findViewById(R.id.tv_agreement)
+        tvShare = laHomeMenu.findViewById(R.id.tv_share)
+        clSwitch = findViewById(R.id.cl_switch)
+        adImg = findViewById(R.id.ad_img)
+        ad_frame = findViewById(R.id.ad_frame)
+    }
+
     private fun initLiveBus() {
         LiveEventBus
             .get(Constant.SERVER_INFORMATION, ProfileBean.SafeLocation::class.java)
@@ -130,6 +156,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
                 mInterstitialAd = it
                 plugInAdvertisementCallback()
             }
+
+        LiveEventBus
+            .get(Constant.NATIVE_ADS, AdLoader::class.java)
+            .observeForever {
+                mNativeAds = it
+            }
     }
 
     private fun initAd() {
@@ -141,31 +173,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
      * 初始化原生广告
      */
     private fun initNativeAds() {
-        ad_frame = findViewById(R.id.ad_frame)
-        mNativeAds = AdLoader.Builder(this, "ca-app-pub-3940256099942544/2247696110")
-        mNativeAds.forNativeAd { nativeAd ->
-            // OnUnifiedNativeAdLoadedListener implementation.
-            // If this callback occurs after the activity is destroyed, you must call
-            // destroy and return or you may get a memory leak.
-            var activityDestroyed = false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                activityDestroyed = isDestroyed
-            }
-            if (activityDestroyed || isFinishing || isChangingConfigurations) {
-                nativeAd.destroy()
-                return@forNativeAd
-            }
-            // You must call destroy on old ads when you are done with them,
-            // otherwise you will have a memory leak.
-            currentNativeAd?.destroy()
-            currentNativeAd = nativeAd
-            val adView = layoutInflater
-                .inflate(R.layout.layout_ad_view, null) as NativeAdView
-//            val adView = fl.findViewById<NativeAdView>(R.id.nad_view)
-            populateNativeAdView(nativeAd, adView)
-            ad_frame.removeAllViews()
-            ad_frame.addView(adView)
-        }
         val videoOptions = VideoOptions.Builder()
             .setStartMuted(true)
             .build()
@@ -173,11 +180,29 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         val adOptions = NativeAdOptions.Builder()
             .setVideoOptions(videoOptions)
             .setAdChoicesPlacement(NativeAdOptions.ADCHOICES_TOP_LEFT)
-            .setMediaAspectRatio(com.google.android.gms.ads.nativead.NativeAdOptions.NATIVE_MEDIA_ASPECT_RATIO_PORTRAIT)
             .build()
-
-        mNativeAds.withNativeAdOptions(adOptions)
-        val adLoader = mNativeAds.withAdListener(object : AdListener() {
+        mNativeAds = AdLoader.Builder(this, "ca-app-pub-3940256099942544/2247696110")
+            .forNativeAd { nativeAd ->
+                ad_frame.visibility = View.VISIBLE
+                adImg.visibility = View.GONE
+                var activityDestroyed = false
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    activityDestroyed = isDestroyed
+                }
+                if (activityDestroyed || isFinishing || isChangingConfigurations) {
+                    nativeAd.destroy()
+                    return@forNativeAd
+                }
+                // You must call destroy on old ads when you are done with them,
+                // otherwise you will have a memory leak.
+                currentNativeAd?.destroy()
+                currentNativeAd = nativeAd
+                val adView = layoutInflater
+                    .inflate(R.layout.layout_ad_view, null) as NativeAdView
+                populateNativeAdView(nativeAd, adView)
+                ad_frame.removeAllViews()
+                ad_frame.addView(adView)
+            }.withNativeAdOptions(adOptions).withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 val error =
                     """
@@ -189,25 +214,23 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
                 ).show()
             }
         }).build()
-
-        adLoader.loadAd(AdRequest.Builder().build())
+        mNativeAds.loadAd(AdRequest.Builder().build())
     }
 
     private fun populateNativeAdView(nativeAd: NativeAd, adView: NativeAdView) {
         // Set the media view.
         adView.mediaView = adView.findViewById(R.id.ad_media)
-
-        // Set other ad assets.
         adView.headlineView = adView.findViewById(R.id.ad_headline)
         adView.bodyView = adView.findViewById(R.id.ad_body)
         adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
         adView.iconView = adView.findViewById(R.id.ad_app_icon)
         adView.advertiserView = adView.findViewById(R.id.ad_advertiser)
         (adView.headlineView as TextView).text = nativeAd.headline
-        nativeAd.mediaContent?.let { adView.mediaView?.setMediaContent(it) }
-
-        // These assets aren't guaranteed to be in every UnifiedNativeAd, so it's important to
-        // check before trying to display them.
+        nativeAd.mediaContent?.let {
+            adView.mediaView?.setMediaContent(it)
+            adView.mediaView?.setImageScaleType(ImageView.ScaleType.CENTER_CROP)
+            adView.mediaView
+        }
         if (nativeAd.body == null) {
             adView.bodyView?.visibility = View.INVISIBLE
         } else {
@@ -237,39 +260,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
             (adView.advertiserView as TextView).text = nativeAd.advertiser
             adView.advertiserView?.visibility = View.VISIBLE
         }
-
-        // This method tells the Google Mobile Ads SDK that you have finished populating your
-        // native ad view with this native ad.
         adView.setNativeAd(nativeAd)
-
     }
 
     private fun loadScreenAdvertisement(adRequest: AdRequest) {
         AdLoad.loadScreenAdvertisement(this, "ca-app-pub-3940256099942544/1033173712", adRequest)
-    }
-
-    private fun initView() {
-        frameLayoutTitle = findViewById(R.id.main_title)
-        frameLayoutTitle.setPadding(
-            0,
-            DensityUtils.px2dp(StatusBarUtils.getStatusBarHeight(this).toFloat()) + 50, 0, 0
-        )
-        timer = findViewById(R.id.timer)
-        imgSwitch = findViewById(R.id.img_switch)
-        txtConnect = findViewById(R.id.txt_connect)
-        imgCountry = findViewById(R.id.img_country)
-        tvLocation = findViewById(R.id.tv_location)
-        radioGroup = findViewById(R.id.radio_group)
-        radioButton0 = findViewById(R.id.radio_button0)
-        radioButton1 = findViewById(R.id.radio_button1)
-        rightTitle = frameLayoutTitle.findViewById(R.id.ivRight)
-        navigation = frameLayoutTitle.findViewById(R.id.ivBack)
-        slidingMenu = findViewById(R.id.slidingMenu)
-        laHomeMenu = findViewById(R.id.la_home_menu)
-        tvContact = laHomeMenu.findViewById(R.id.tv_contact)
-        tvAgreement = laHomeMenu.findViewById(R.id.tv_agreement)
-        tvShare = laHomeMenu.findViewById(R.id.tv_share)
-        clSwitch = findViewById(R.id.cl_switch)
     }
 
     /**
@@ -327,7 +322,14 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         MmkvUtils.set(Constant.SLIDING, true)
         mInterstitialAd?.show(this)
     }
-
+    /**
+     * 手动开启服务
+     */
+    private fun manuallyStartTheService() {
+        imgSwitch.playAnimation()
+        MmkvUtils.set(Constant.SLIDING, true)
+        startVpn()
+    }
     /**
      * 开关状态
      */
@@ -356,14 +358,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         timer.format = "0$hour:%s"
     }
 
-    /**
-     * 手动开启服务
-     */
-    private fun manuallyStartTheService() {
-        imgSwitch.playAnimation()
-        MmkvUtils.set(Constant.SLIDING, true)
-        startVpn()
-    }
+
 
     /**
      * 初始连接服务器
@@ -401,7 +396,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
         }
         DataStore.profileId = 1L
         isFrontDesk = true
-        manuallyStartTheService()
+        vpnSwitch()
     }
 
     /**
@@ -642,6 +637,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
     }
 
     override fun onExit() {
-        XUtil.get().exitApp()
+//        XUtil.get().exitApp()
     }
 }

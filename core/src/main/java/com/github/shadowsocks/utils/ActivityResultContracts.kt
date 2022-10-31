@@ -32,14 +32,14 @@ import timber.log.Timber
 
 private val jsonMimeTypes = arrayOf("application/*", "text/*")
 
-object OpenJson : ActivityResultContracts.GetMultipleContents() {
+class OpenJson : ActivityResultContracts.GetMultipleContents() {
     override fun createIntent(context: Context, input: String) = super.createIntent(context,
             jsonMimeTypes.first()).apply { putExtra(Intent.EXTRA_MIME_TYPES, jsonMimeTypes) }
 }
 
-object SaveJson : ActivityResultContracts.CreateDocument("application/json") {
+class SaveJson : ActivityResultContracts.CreateDocument() {
     override fun createIntent(context: Context, input: String) =
-            super.createIntent(context, "profiles.json")
+            super.createIntent(context, "profiles.json").apply { type = "application/json" }
 }
 
 class StartService : ActivityResultContract<Void?, Boolean>() {
@@ -50,14 +50,14 @@ class StartService : ActivityResultContract<Void?, Boolean>() {
             cachedIntent = intent
             return null
         }
-        Core.startService()
+//        Core.startService()
         return SynchronousResult(false)
     }
 
     override fun createIntent(context: Context, input: Void?) = cachedIntent!!.also { cachedIntent = null }
 
     override fun parseResult(resultCode: Int, intent: Intent?) = if (resultCode == Activity.RESULT_OK) {
-        Core.startService()
+//        Core.startService()
         false
     } else {
         Timber.e("Failed to start VpnService: $intent")

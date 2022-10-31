@@ -10,34 +10,13 @@ use std::{
 use byte_string::ByteStr;
 use bytes::{BufMut, Bytes, BytesMut};
 use futures::ready;
-use log::trace;
+use log::{trace, warn};
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
 use crate::{
     context::Context,
-    crypto::{v1::Cipher, CipherKind},
+    crypto::v1::{Cipher, CipherKind},
 };
-
-/// Stream protocol error
-#[derive(thiserror::Error, Debug)]
-pub enum ProtocolError {
-    #[error(transparent)]
-    IoError(#[from] io::Error),
-    #[error("decrypt failed")]
-    DecryptError,
-}
-
-/// Stream protocol result
-pub type ProtocolResult<T> = Result<T, ProtocolError>;
-
-impl From<ProtocolError> for io::Error {
-    fn from(e: ProtocolError) -> io::Error {
-        match e {
-            ProtocolError::IoError(err) => err,
-            _ => io::Error::new(ErrorKind::Other, e),
-        }
-    }
-}
 
 enum DecryptReadState {
     WaitIv { key: Bytes },
@@ -50,8 +29,6 @@ pub struct DecryptedReader {
     cipher: Option<Cipher>,
     buffer: BytesMut,
     method: CipherKind,
-    iv: Option<Bytes>,
-    has_handshaked: bool,
 }
 
 impl DecryptedReader {
@@ -64,8 +41,6 @@ impl DecryptedReader {
                 cipher: None,
                 buffer: BytesMut::with_capacity(method.iv_len()),
                 method,
-                iv: None,
-                has_handshaked: false,
             }
         } else {
             DecryptedReader {
@@ -73,14 +48,8 @@ impl DecryptedReader {
                 cipher: Some(Cipher::new(method, key, &[])),
                 buffer: BytesMut::new(),
                 method,
-                iv: Some(Bytes::new()),
-                has_handshaked: false,
             }
         }
-    }
-
-    pub fn iv(&self) -> Option<&[u8]> {
-        self.iv.as_deref()
     }
 
     /// Attempt to read decrypted data from reader
@@ -90,7 +59,7 @@ impl DecryptedReader {
         context: &Context,
         stream: &mut S,
         buf: &mut ReadBuf<'_>,
-    ) -> Poll<ProtocolResult<()>>
+    ) -> Poll<io::Result<()>>
     where
         S: AsyncRead + Unpin + ?Sized,
     {
@@ -103,7 +72,6 @@ impl DecryptedReader {
                     self.buffer.clear();
                     self.buffer.truncate(0);
                     self.state = DecryptReadState::Read;
-                    self.has_handshaked = true;
                 }
                 DecryptReadState::Read => {
                     let before_n = buf.filled().len();
@@ -117,7 +85,7 @@ impl DecryptedReader {
 
                     let cipher = self.cipher.as_mut().expect("cipher is None");
                     if !cipher.decrypt_packet(m) {
-                        return Err(ProtocolError::DecryptError).into();
+                        return Err(io::Error::new(ErrorKind::Other, "stream cipher decrypt failed")).into();
                     }
 
                     return Ok(()).into();
@@ -132,7 +100,7 @@ impl DecryptedReader {
         context: &Context,
         stream: &mut S,
         key: &[u8],
-    ) -> Poll<ProtocolResult<()>>
+    ) -> Poll<io::Result<()>>
     where
         S: AsyncRead + Unpin + ?Sized,
     {
@@ -140,18 +108,18 @@ impl DecryptedReader {
 
         let n = ready!(self.poll_read_exact(cx, stream, iv_len))?;
         if n < iv_len {
-            return Err(io::Error::from(ErrorKind::UnexpectedEof).into()).into();
+            return Err(ErrorKind::UnexpectedEof.into()).into();
         }
 
         let iv = &self.buffer[..iv_len];
-        context.check_nonce_replay(self.method, iv)?;
+        if context.check_nonce_and_set(&iv) {
+            warn!("detected repeated stream iv {:?}", ByteStr::new(&iv));
+        }
 
         trace!("got stream iv {:?}", ByteStr::new(iv));
 
-        // Stores IV
-        self.iv = Some(Bytes::copy_from_slice(iv));
-
         let cipher = Cipher::new(self.method, key, iv);
+
         self.cipher = Some(cipher);
 
         Ok(()).into()
@@ -187,11 +155,6 @@ impl DecryptedReader {
 
         Ok(size).into()
     }
-
-    /// Check if handshake finished
-    pub fn handshaked(&self) -> bool {
-        self.has_handshaked
-    }
 }
 
 enum EncryptWriteState {
@@ -204,7 +167,6 @@ pub struct EncryptedWriter {
     cipher: Cipher,
     buffer: BytesMut,
     state: EncryptWriteState,
-    iv: Bytes,
 }
 
 impl EncryptedWriter {
@@ -218,13 +180,7 @@ impl EncryptedWriter {
             cipher: Cipher::new(method, key, nonce),
             buffer,
             state: EncryptWriteState::AssemblePacket,
-            iv: Bytes::copy_from_slice(nonce),
         }
-    }
-
-    /// IV
-    pub fn iv(&self) -> &[u8] {
-        self.iv.as_ref()
     }
 
     /// Attempt to write encrypted data into the writer
@@ -233,7 +189,7 @@ impl EncryptedWriter {
         cx: &mut task::Context<'_>,
         stream: &mut S,
         buf: &[u8],
-    ) -> Poll<ProtocolResult<usize>>
+    ) -> Poll<io::Result<usize>>
     where
         S: AsyncWrite + Unpin + ?Sized,
     {
@@ -249,7 +205,7 @@ impl EncryptedWriter {
                     while *pos < self.buffer.len() {
                         let n = ready!(Pin::new(&mut *stream).poll_write(cx, &self.buffer[*pos..]))?;
                         if n == 0 {
-                            return Err(io::Error::from(ErrorKind::UnexpectedEof).into()).into();
+                            return Err(ErrorKind::UnexpectedEof.into()).into();
                         }
                         *pos += n;
                     }

@@ -123,9 +123,9 @@ object DefaultNetworkListener {
      */
     private fun register() {
         when (Build.VERSION.SDK_INT) {
-            in 31..Int.MAX_VALUE -> @TargetApi(31) {
-                Core.connectivity.registerBestMatchingNetworkCallback(request, Callback, mainHandler)
-            }
+//            in 31..Int.MAX_VALUE -> @TargetApi(31) {
+//                Core.connectivity.registerBestMatchingNetworkCallback(request, Callback, mainHandler)
+//            }
             in 28 until 31 -> @TargetApi(28) {  // we want REQUEST here instead of LISTEN
                 Core.connectivity.requestNetwork(request, Callback, mainHandler)
             }

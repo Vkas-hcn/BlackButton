@@ -1,1 +1,1 @@
-include(":core", ":plugin", "app")
+include(":core", ":app")

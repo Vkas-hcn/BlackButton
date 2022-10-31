@@ -127,7 +127,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="212dp"
                 android:layout_margin="@dimen/dp20"
-                android:background="@drawable/bg_main_ad"
                 app:layout_constraintBottom_toTopOf="@+id/timer"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -136,14 +135,16 @@
                 <FrameLayout
                     android:id="@+id/ad_frame"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_main_ad"
+                    android:visibility="gone" />
 
                 <ImageView
+                    android:id="@+id/ad_img"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:src="@mipmap/ic_placeholder"
-                    android:visibility="gone" />
+                    android:src="@mipmap/ic_placeholder"/>
             </FrameLayout>
 
 

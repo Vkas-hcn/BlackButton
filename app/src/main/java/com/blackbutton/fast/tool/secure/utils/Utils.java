@@ -38,7 +38,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 
 import com.blackbutton.fast.tool.secure.bean.ProfileBean;
-import com.github.shadowsocks.R;
+import com.first.conn.R;
 import com.xuexiang.xutil.tip.ToastUtils;
 
 import java.io.Closeable;

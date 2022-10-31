@@ -20,10 +20,12 @@ use crate::{
         context::ServiceContext,
         loadbalancing::PingBalancer,
         net::AutoProxyClientStream,
-        redir::redir_ext::{TcpListenerRedirExt, TcpStreamRedirExt},
-        utils::{establish_tcp_tunnel, establish_tcp_tunnel_bypassed},
+        redir::{
+            redir_ext::{TcpListenerRedirExt, TcpStreamRedirExt},
+            to_ipv4_mapped,
+        },
+        utils::establish_tcp_tunnel,
     },
-    net::utils::to_ipv4_mapped,
 };
 
 mod sys;
@@ -38,11 +40,6 @@ async fn establish_client_tcp_redir<'a>(
     peer_addr: SocketAddr,
     addr: &Address,
 ) -> io::Result<()> {
-    if balancer.is_empty() {
-        let mut remote = AutoProxyClientStream::connect_bypassed(context, addr).await?;
-        return establish_tcp_tunnel_bypassed(&mut stream, &mut remote, peer_addr, addr).await;
-    }
-
     let server = balancer.best_tcp_server();
     let svr_cfg = server.server_config();
 
@@ -77,10 +74,10 @@ pub async fn run_tcp_redir(
     redir_ty: RedirType,
 ) -> io::Result<()> {
     let listener = match *client_config {
-        ServerAddr::SocketAddr(ref saddr) => TcpListener::bind_redir(redir_ty, *saddr, context.accept_opts()).await?,
+        ServerAddr::SocketAddr(ref saddr) => TcpListener::bind_redir(redir_ty, *saddr).await?,
         ServerAddr::DomainName(ref dname, port) => {
             lookup_then!(context.context_ref(), dname, port, |addr| {
-                TcpListener::bind_redir(redir_ty, addr, context.accept_opts()).await
+                TcpListener::bind_redir(redir_ty, addr).await
             })?
             .1
         }

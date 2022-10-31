@@ -2,16 +2,22 @@ package com.blackbutton.fast.tool.secure.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Looper
+import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.github.shadowsocks.bean.AroundFlowBean
+import com.blackbutton.fast.tool.secure.app.App
 import com.blackbutton.fast.tool.secure.constant.Constant
 import com.blackbutton.fast.tool.secure.utils.*
 import com.blackbutton.fast.tool.secure.utils.NetworkPing.findTheBestIp
 import com.blackbutton.fast.tool.secure.widget.HorizontalProgressView
-import com.github.shadowsocks.BuildConfig
-import com.github.shadowsocks.R
+import com.example.testdemo.utils.KLog
+import com.first.conn.BuildConfig
+import com.first.conn.R
+import com.github.shadowsocks.bean.AroundFlowBean
+import com.google.android.gms.ads.AdLoader
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.jeremyliao.liveeventbus.LiveEventBus
@@ -24,8 +30,8 @@ import java.util.*
 class StartupActivity : AppCompatActivity(),
     HorizontalProgressView.HorizontalProgressUpdateListener {
     private lateinit var horizontalProgressView: HorizontalProgressView
-    private val timer = Timer()
-    private val timerTask: TimerTask = HomeTimerTask()
+    private var secondsRemaining: Long = 0L
+    private lateinit var mNativeAds: AdLoader
 
     // 绕流数据
     private lateinit var aroundFlowData: AroundFlowBean
@@ -43,12 +49,6 @@ class StartupActivity : AppCompatActivity(),
         horizontalProgressView.startProgressAnimation()
         aroundFlowData = AroundFlowBean()
         getFirebaseData()
-
-        LiveEventBus
-            .get("JUMP_PAGE", Boolean::class.java)
-            .observeForever {
-                jumpPage()
-            }
     }
 
     /**
@@ -56,7 +56,11 @@ class StartupActivity : AppCompatActivity(),
      */
     private fun getFirebaseData() {
         if (BuildConfig.DEBUG) {
-            timer.schedule(timerTask, 2000)
+            val application = application as? App
+
+            application?.AD_UNIT_ID = "ca-app-pub-3940256099942544/3419835294"
+
+            openAd(10L)
             return
         } else {
             val auth = Firebase.remoteConfig
@@ -65,7 +69,10 @@ class StartupActivity : AppCompatActivity(),
                 MmkvUtils.set(Constant.AROUND_FLOW_DATA, auth.getString("aroundFlowData"))
                 MmkvUtils.set(Constant.PROFILE_DATA, auth.getString("profileData"))
             }.addOnCompleteListener {
-                timer.schedule(timerTask, 2000)
+//                timer.schedule(timerTask, 2000)
+                mNativeAds = AdLoader.Builder(this, "ca-app-pub-3940256099942544/2247696110").build()
+                LiveEventBus.get(Constant.NATIVE_ADS).post(mNativeAds)
+
             }
         }
     }
@@ -90,6 +97,33 @@ class StartupActivity : AppCompatActivity(),
         val dataJson = JsonUtil.toJson(bestData)
         MmkvUtils.set(Constant.BEST_SERVICE_DATA, dataJson)
         startActivity(intent)
+    }
+
+    private fun openAd(seconds: Long) {
+        val countDownTimer: CountDownTimer = object : CountDownTimer(seconds * 1000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                secondsRemaining = millisUntilFinished / 1000 + 1
+            }
+
+            override fun onFinish() {
+                secondsRemaining = 0
+
+                val application = application as? App
+                if (application == null) {
+                    jumpPage()
+                    return
+                }
+                // Show the app open ad.
+                application.showAdIfAvailable(
+                    this@StartupActivity,
+                    object : App.OnShowAdCompleteListener {
+                        override fun onShowAdComplete() {
+                            jumpPage()
+                        }
+                    })
+            }
+        }
+        countDownTimer.start()
     }
 
     override fun onStop() {

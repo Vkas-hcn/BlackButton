@@ -13,7 +13,7 @@ import com.tencent.mmkv.BuildConfig
 object AroundFlowConfigure {
     private val mmkv by lazy {
         //启用mmkv的多进程功能
-        MMKV.mmkvWithID("Spin", MMKV.MULTI_PROCESS_MODE)
+        MMKV.mmkvWithID("BlackButton", MMKV.MULTI_PROCESS_MODE)
     }
 
     /**

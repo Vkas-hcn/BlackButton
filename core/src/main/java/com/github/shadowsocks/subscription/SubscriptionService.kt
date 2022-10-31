@@ -76,10 +76,10 @@ class SubscriptionService : Service(), CoroutineScope {
             worker = launch {
                 val urls = Subscription.instance.urls
                 val notification = NotificationCompat.Builder(this@SubscriptionService, NOTIFICATION_CHANNEL).apply {
-                    color = ContextCompat.getColor(this@SubscriptionService, com.github.shadowsocks.plugin.R.color.material_primary_500)
+                    color = ContextCompat.getColor(this@SubscriptionService, R.color.material_primary_500)
                     priority = NotificationCompat.PRIORITY_LOW
                     addAction(NotificationCompat.Action.Builder(
-                        com.github.shadowsocks.plugin.R.drawable.ic_navigation_close,
+                            R.drawable.ic_navigation_close,
                             getText(R.string.stop),
                             PendingIntent.getBroadcast(this@SubscriptionService, 0,
                                     Intent(Action.ABORT).setPackage(packageName), PendingIntent.FLAG_IMMUTABLE)).apply {

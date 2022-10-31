@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.blackbutton.fast.tool.secure.constant.Constant
 import com.blackbutton.fast.tool.secure.utils.DensityUtils
 import com.blackbutton.fast.tool.secure.utils.StatusBarUtils
-import com.github.shadowsocks.R
+import com.first.conn.R
 
 
 class AgreementWebView : AppCompatActivity() {

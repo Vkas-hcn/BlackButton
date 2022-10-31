@@ -14,11 +14,11 @@ use arc_swap::ArcSwap;
 use async_trait::async_trait;
 use cfg_if::cfg_if;
 #[cfg(feature = "trust-dns")]
+use futures::future::{self, AbortHandle};
+#[cfg(feature = "trust-dns")]
 use log::error;
 use log::{log_enabled, trace, Level};
 use tokio::net::lookup_host;
-#[cfg(feature = "trust-dns")]
-use tokio::task::JoinHandle;
 #[cfg(feature = "trust-dns")]
 use trust_dns_resolver::{config::ResolverConfig, TokioAsyncResolver};
 
@@ -44,7 +44,7 @@ pub enum DnsResolver {
     #[cfg(feature = "trust-dns")]
     TrustDnsSystem {
         inner: Arc<TrustDnsSystemResolver>,
-        abortable: JoinHandle<()>,
+        abortable: AbortHandle,
     },
     /// Trust-DNS resolver
     #[cfg(feature = "trust-dns")]
@@ -135,70 +135,50 @@ cfg_if! {
 
 #[cfg(all(feature = "trust-dns", unix, not(target_os = "android")))]
 async fn trust_dns_notify_update_dns(resolver: Arc<TrustDnsSystemResolver>) -> notify::Result<()> {
-    use std::{path::Path, time::Duration};
+    use std::path::Path;
 
     use log::debug;
     use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Result as NotifyResult, Watcher};
-    use tokio::{sync::watch, time};
+    use tokio::sync::watch;
 
     use super::trust_dns_resolver::create_resolver;
-
-    static DNS_RESOLV_FILE_PATH: &str = "/etc/resolv.conf";
 
     let (tx, mut rx) = watch::channel::<Event>(Event::default());
 
     let mut watcher: RecommendedWatcher =
         notify::recommended_watcher(move |ev_result: NotifyResult<Event>| match ev_result {
             Ok(ev) => {
-                trace!("received {} event {:?}", DNS_RESOLV_FILE_PATH, ev);
+                trace!("received event {:?}", ev);
 
                 if let EventKind::Modify(..) = ev.kind {
                     tx.send(ev).expect("watcher.send");
                 }
             }
             Err(err) => {
-                error!("watching {} error: {}", DNS_RESOLV_FILE_PATH, err);
+                error!("watching /etc/resolv.conf error: {}", err);
             }
         })?;
 
     // NOTE: It is an undefined behavior if this file get renamed or removed.
-    watcher.watch(Path::new(DNS_RESOLV_FILE_PATH), RecursiveMode::NonRecursive)?;
-
-    // Delayed task
-    let mut update_task: Option<JoinHandle<()>> = None;
+    watcher.watch(Path::new("/etc/resolv.conf"), RecursiveMode::NonRecursive)?;
 
     while rx.changed().await.is_ok() {
-        trace!("received notify {} changed", DNS_RESOLV_FILE_PATH);
+        trace!("received notify /etc/resolv.conf changed");
 
-        // Kill the pending task
-        if let Some(t) = update_task.take() {
-            t.abort();
-        }
-
-        let task = {
-            let resolver = resolver.clone();
-            tokio::spawn(async move {
-                // /etc/resolv.conf may be modified multiple time in 1 second
-                // Update once for all those Modify events
-                time::sleep(Duration::from_secs(1)).await;
-
-                match create_resolver(None, resolver.ipv6_first).await {
-                    Ok(r) => {
-                        debug!("auto-reload {}", DNS_RESOLV_FILE_PATH);
-
-                        resolver.resolver.store(Arc::new(r));
-                    }
-                    Err(err) => {
-                        error!("failed to reload {}, error: {}", DNS_RESOLV_FILE_PATH, err);
-                    }
-                }
-            })
+        let new_resolver = match create_resolver(None, resolver.ipv6_first).await {
+            Ok(r) => r,
+            Err(err) => {
+                error!("failed to reload /etc/resolv.conf, error: {}", err);
+                continue;
+            }
         };
 
-        update_task = Some(task);
+        debug!("auto-reload /etc/resolv.conf");
+
+        resolver.resolver.store(Arc::new(new_resolver));
     }
 
-    error!("auto-reload {} task exited unexpectedly", DNS_RESOLV_FILE_PATH);
+    error!("auto-reload /etc/resolv.conf task exited unexpectly");
 
     Ok(())
 }
@@ -206,7 +186,7 @@ async fn trust_dns_notify_update_dns(resolver: Arc<TrustDnsSystemResolver>) -> n
 #[cfg(all(feature = "trust-dns", any(not(unix), target_os = "android")))]
 async fn trust_dns_notify_update_dns(resolver: Arc<TrustDnsSystemResolver>) -> notify::Result<()> {
     let _ = resolver.ipv6_first; // use it for supressing warning
-    futures::future::pending().await
+    future::pending().await
 }
 
 impl DnsResolver {
@@ -229,14 +209,15 @@ impl DnsResolver {
             ipv6_first,
         });
 
-        let abortable = {
+        let (notify_task, abortable) = {
             let inner = inner.clone();
-            tokio::spawn(async {
+            future::abortable(async {
                 if let Err(err) = trust_dns_notify_update_dns(inner).await {
                     error!("failed to watch DNS system configuration changes, error: {}", err);
                 }
             })
         };
+        tokio::spawn(notify_task);
 
         Ok(DnsResolver::TrustDnsSystem { inner, abortable })
     }

@@ -42,7 +42,7 @@ public class MmkvUtils {
      * @param value
      */
     public static void set(String key, Object value) {
-        MMKV kv = MMKV.mmkvWithID("Spin",MMKV.MULTI_PROCESS_MODE);
+        MMKV kv = MMKV.mmkvWithID("BlackButton",MMKV.MULTI_PROCESS_MODE);
         boolean result = false;
         if (value instanceof Integer) {
             result = kv.encode(key, (Integer) value);

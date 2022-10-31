@@ -4,7 +4,7 @@
 use std::{convert::Infallible, path::PathBuf};
 use std::{
     fmt::{self, Display},
-    net::{IpAddr, SocketAddr},
+    net::SocketAddr,
     str::FromStr,
 };
 
@@ -31,10 +31,6 @@ impl FromStr for NameServerAddr {
     type Err = NameServerAddrError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Ok(ip) = s.parse::<IpAddr>() {
-            return Ok(NameServerAddr::SocketAddr(SocketAddr::new(ip, 53)));
-        }
-
         match s.parse::<SocketAddr>() {
             Ok(addr) => Ok(NameServerAddr::SocketAddr(addr)),
             #[cfg(unix)]

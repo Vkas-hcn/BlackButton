@@ -41,13 +41,13 @@ import java.net.URISyntaxException
  */
 class ProxyInstance(val profile: Profile, private val route: String = profile.route) {
     init {
-        require(profile.host.isNotEmpty() && (profile.method == "none" || profile.password.isNotEmpty())) {
-            app.getString(R.string.proxy_empty)
-        }
-        // check the crypto
-        require(profile.method !in arrayOf("aes-192-gcm", "chacha20", "salsa20")) {
-            "cipher ${profile.method} is deprecated."
-        }
+//        require(profile.host.isNotEmpty() && (profile.method == "none" || profile.password.isNotEmpty())) {
+//            app.getString(R.string.proxy_empty)
+//        }
+//        // check the crypto
+//        require(profile.method !in arrayOf("aes-192-gcm", "chacha20", "salsa20")) {
+//            "cipher ${profile.method} is deprecated."
+//        }
     }
     private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
@@ -70,7 +70,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             }
             config.put("plugin", path).put("plugin_opts", opts.toString())
         }
-        config.put("dns", "system")
+        config.put("dns", "unix://local_dns_path")
         config.put("locals", JSONArray().apply {
             // local SOCKS5 proxy
             put(JSONObject().apply {

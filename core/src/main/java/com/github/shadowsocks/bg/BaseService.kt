@@ -20,14 +20,17 @@
 
 package com.github.shadowsocks.bg
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
+import android.os.Process
 import android.os.RemoteCallbackList
 import android.os.RemoteException
+import android.util.Log
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
@@ -36,11 +39,17 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.net.DnsResolverCompat
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
 import com.github.shadowsocks.utils.readableMessage
+//import com.google.firebase.analytics.FirebaseAnalytics
+//import com.google.firebase.analytics.ktx.analytics
+//import com.google.firebase.analytics.ktx.logEvent
+//import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.io.File
@@ -264,6 +273,7 @@ object BaseService {
             // channge the state
             data.changeState(State.Stopping)
             GlobalScope.launch(Dispatchers.Main.immediate) {
+//                Firebase.analytics.logEvent("stop") { param(FirebaseAnalytics.Param.METHOD, tag) }
                 data.connectingJob?.cancelAndJoin() // ensure stop connecting first
                 this@Interface as Service
                 // we use a coroutineScope here to allow clean-up in parallel
@@ -306,21 +316,23 @@ object BaseService {
         suspend fun rawResolver(query: ByteArray) = DnsResolverCompat.resolveRawOnActiveNetwork(query)
         suspend fun openConnection(url: URL) = url.openConnection()
 
+        @SuppressLint("LogNotTimber")
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             val data = data
             if (data.state != State.Stopped) return Service.START_NOT_STICKY
-            val expanded = Core.currentProfile
+            val profile = Core.currentProfile
+            Log.i(BaseService::class.simpleName, "onStartCommand: use profile[id = ${profile?.id}], host = ${profile?.host}, name = ${profile?.name}")
             this as Context
-            if (expanded == null) {
+            if (profile == null) {
+                Log.i(BaseService::class.simpleName, "onStartCommand: no available profile, stop runner automatically")
                 // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107
                 data.notification = createNotification("")
                 stopRunner(false, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }
-            val (profile, fallback) = expanded
             try {
                 data.proxy = ProxyInstance(profile)
-                data.udpFallback = if (fallback == null) null else ProxyInstance(fallback, profile.route)
+                data.udpFallback = null //if (fallback == null) null else ProxyInstance(fallback, profile.route)
             } catch (e: IllegalArgumentException) {
                 data.notification = createNotification("")
                 stopRunner(false, e.message)
@@ -338,8 +350,7 @@ object BaseService {
             }
 
             data.notification = createNotification(profile.formattedName)
-
-            data.changeState(State.Connecting)
+//            Firebase.analytics.logEvent("start") { param(FirebaseAnalytics.Param.METHOD, tag) }
             data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
                 try {
                     Executable.killAll()    // clean up old processes

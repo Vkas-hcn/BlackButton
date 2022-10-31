@@ -71,12 +71,6 @@ impl AsyncWrite for TcpStream {
     }
 }
 
-/// Disable IP fragmentation
-#[inline]
-pub fn set_disable_ip_fragmentation<S: AsRawFd>(_af: AddrFamily, _socket: &S) -> io::Result<()> {
-    Ok(())
-}
-
 /// Create a `UdpSocket` for connecting to `addr`
 #[inline(always)]
 pub async fn create_outbound_udp_socket(af: AddrFamily, config: &ConnectOpts) -> io::Result<UdpSocket> {
@@ -87,10 +81,7 @@ pub async fn create_outbound_udp_socket(af: AddrFamily, config: &ConnectOpts) ->
         (AddrFamily::Ipv6, ..) => SocketAddr::new(Ipv6Addr::UNSPECIFIED.into(), 0),
     };
 
-    let socket = UdpSocket::bind(bind_addr).await?;
-    let _ = set_disable_ip_fragmentation(af, &socket);
-
-    Ok(socket)
+    UdpSocket::bind(bind_addr).await
 }
 
 pub fn set_tcp_fastopen<S: AsRawFd>(_: &S) -> io::Result<()> {

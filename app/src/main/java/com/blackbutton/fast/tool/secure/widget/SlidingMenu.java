@@ -14,7 +14,7 @@ import android.widget.HorizontalScrollView;
 import androidx.core.view.ViewCompat;
 
 import com.blackbutton.fast.tool.secure.constant.Constant;
-import com.github.shadowsocks.R;
+import com.first.conn.R;
 import com.tencent.mmkv.MMKV;
 
 public class SlidingMenu extends HorizontalScrollView {

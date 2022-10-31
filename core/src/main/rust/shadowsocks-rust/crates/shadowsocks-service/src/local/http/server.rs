@@ -17,14 +17,9 @@ use hyper::{
 use log::{error, info};
 use shadowsocks::{config::ServerAddr, lookup_then, net::TcpListener};
 
-use crate::local::{
-    context::ServiceContext,
-    http::connector::Connector,
-    loadbalancing::PingBalancer,
-    LOCAL_DEFAULT_KEEPALIVE_TIMEOUT,
-};
+use crate::local::{context::ServiceContext, loadbalancing::PingBalancer, LOCAL_DEFAULT_KEEPALIVE_TIMEOUT};
 
-use super::{client_cache::ProxyClientCache, dispatcher::HttpDispatcher};
+use super::{client_cache::ProxyClientCache, connector::BypassConnector, dispatcher::HttpDispatcher};
 
 /// HTTP Local server
 pub struct Http {
@@ -59,7 +54,7 @@ impl Http {
         let bypass_client = Client::builder()
             .http1_preserve_header_case(true)
             .http1_title_case_headers(true)
-            .build::<_, Body>(Connector::new(self.context.clone(), None));
+            .build::<_, Body>(BypassConnector::new(self.context.clone()));
 
         let context = self.context.clone();
         let proxy_client_cache = self.proxy_client_cache.clone();

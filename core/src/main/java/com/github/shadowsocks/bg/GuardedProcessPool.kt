@@ -71,12 +71,12 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                     val startTime = SystemClock.elapsedRealtime()
                     val exitCode = exitChannel.receive()
                     running = false
-                    when {
-                        SystemClock.elapsedRealtime() - startTime < 1000 -> throw IOException(
-                                "$cmdName exits too fast (exit code: $exitCode)")
-                        exitCode == 128 + OsConstants.SIGKILL -> Timber.w("$cmdName was killed")
-                        else -> Timber.w(IOException("$cmdName unexpectedly exits with code $exitCode"))
-                    }
+//                    when {
+//                        SystemClock.elapsedRealtime() - startTime < 1000 -> throw IOException(
+//                                "$cmdName exits too fast (exit code: $exitCode)")
+//                        exitCode == 128 + OsConstants.SIGKILL -> Timber.w("$cmdName was killed")
+//                        else -> Timber.w(IOException("$cmdName unexpectedly exits with code $exitCode"))
+//                    }
                     Timber.i("restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
                     start()
                     running = true

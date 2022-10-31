@@ -51,8 +51,7 @@
 use std::time::Duration;
 
 #[cfg(feature = "local")]
-pub use self::local::{create as create_local, run as run_local};
-
+pub use self::local::run as run_local;
 #[cfg(feature = "manager")]
 pub use self::manager::run as run_manager;
 #[cfg(feature = "server")]
@@ -82,7 +81,7 @@ fn hint_support_default_system_resolver() -> bool {
     cfg!(all(
         unix,
         not(target_os = "android"),
-        // not(target_os = "macos"),
-        // not(target_os = "ios")
+        /* not(target_os = "macos"),
+         * not(target_os = "ios") */
     ))
 }

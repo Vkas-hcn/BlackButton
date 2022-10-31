@@ -31,6 +31,7 @@ import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import android.util.Log
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
@@ -80,7 +81,8 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                         return@let true
                     } catch (e: IOException) {
                         when ((e.cause as? ErrnoException)?.errno) {
-                            OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
+//                            OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
+                            OsConstants.EPERM, OsConstants.EACCES -> Timber.d(e)
                             else -> Timber.w(e)
                         }
                         return@let false
@@ -135,6 +137,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.i(VpnService::class.simpleName, "onStartCommand")
         if (DataStore.serviceMode == Key.modeVpn) {
             if (prepare(this) != null) {
                 startActivity(Intent(this, VpnRequestActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -162,16 +165,17 @@ class VpnService : BaseVpnService(), BaseService.Interface {
     private suspend fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
         val builder = Builder()
-                .setConfigureIntent(Core.configureIntent(this))
+//                .setConfigureIntent(Core.configureIntent(this))
                 .setSession(profile.formattedName)
                 .setMtu(VPN_MTU)
                 .addAddress(PRIVATE_VLAN4_CLIENT, 30)
                 .addDnsServer(PRIVATE_VLAN4_ROUTER)
 
         if (profile.ipv6) builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
-        AroundFlowConfigure.brand(this,builder,this.packageName)
+
 //        if (profile.proxyApps) {
-//            val me = packageName
+            val me = packageName
+        builder.addDisallowedApplication(me)
 //            profile.individual.split('\n')
 //                    .filter { it != me }
 //                    .forEach {
@@ -193,7 +197,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
             else -> {
                 resources.getStringArray(R.array.bypass_private_route).forEach {
                     val subnet = Subnet.fromString(it)!!
-                    builder.addRoute(subnet.address.hostAddress!!, subnet.prefixSize)
+                    builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
                 }
                 builder.addRoute(PRIVATE_VLAN4_ROUTER, 32)
                 // https://issuetracker.google.com/issues/149636790

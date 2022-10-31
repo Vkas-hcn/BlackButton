@@ -54,10 +54,10 @@ data class Profile(
         // user configurable fields
         var name: String? = "",
 
-        var host: String = "54.250.164.62",
-        var remotePort: Int = 812,
-        var password: String = "G!yBwPWH3Vao",
-        var method: String = "chacha20-ietf-poly1305",
+        var host: String = "",
+        var remotePort: Int = 0,
+        var password: String = "",
+        var method: String = "",
 
         var route: String = "all",
         var remoteDns: String = "dns.google",
@@ -100,6 +100,7 @@ data class Profile(
     }
 
     companion object {
+        const val SMART_PROFILE_DATA_ID = -1L
         private const val serialVersionUID = 1L
         private val pattern =
                 """(?i)ss://[-a-zA-Z0-9+&@#/%?=.~*'()|!:,;_\[\]]*[-a-zA-Z0-9+&@#/%=.~*'()|\[\]]""".toRegex()

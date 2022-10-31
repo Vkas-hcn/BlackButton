@@ -6,7 +6,7 @@ import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.blackbutton.fast.tool.secure.bean.ProfileBean
 import com.blackbutton.fast.tool.secure.constant.Constant
 import com.blackbutton.fast.tool.secure.utils.Utils.FlagConversion
-import com.github.shadowsocks.R
+import com.first.conn.R
 
 
 class ServiceListAdapter(data: List<ProfileBean.SafeLocation>?) :

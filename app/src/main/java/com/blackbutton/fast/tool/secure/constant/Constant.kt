@@ -7,8 +7,8 @@ package com.blackbutton.fast.tool.secure.constant
  */
 
 object Constant {
-    //跳转主页
-    const val JUMP_PAGE = "jumpPage"
+    //主页原生
+    const val NATIVE_ADS = "nativeAds"
     //服务器信息
     const val SERVER_INFORMATION = "serverInformation"
     //滑动

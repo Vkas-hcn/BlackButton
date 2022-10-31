@@ -22,7 +22,10 @@ package com.github.shadowsocks
 
 import android.app.*
 import android.app.admin.DevicePolicyManager
-import android.content.*
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
@@ -33,7 +36,6 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import androidx.core.os.persistableBundleOf
 import androidx.work.Configuration
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.ShadowsocksConnection
@@ -47,6 +49,9 @@ import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.DeviceStorageApp
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
+//import com.google.firebase.crashlytics.FirebaseCrashlytics
+//import com.google.firebase.ktx.Firebase
+//import com.google.firebase.ktx.initialize
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import kotlinx.coroutines.GlobalScope
@@ -79,23 +84,25 @@ object Core : Configuration.Provider {
     val activeProfileIds get() = ProfileManager.getProfile(DataStore.profileId).let {
         if (it == null) emptyList() else listOfNotNull(it.id, it.udpFallback)
     }
-    val currentProfile: ProfileManager.ExpandedProfile? get() {
-        if (DataStore.directBootAware) DirectBoot.getDeviceProfile()?.apply { return this }
-        return ProfileManager.expand(ProfileManager.getProfile(DataStore.profileId) ?: return null)
+    val currentProfile: Profile?
+        get() {
+        val profileId = DataStore.profileId
+//        if (profileId == Profile.SMART_PROFILE_DATA_ID) return Profile(id = Profile.SMART_PROFILE_DATA_ID, name = "Faster server")
+        return ProfileManager.getProfile(profileId)
+//        if (DataStore.directBootAware) DirectBoot.getDeviceProfile()?.apply { return this }
+//        return ProfileManager.expand(ProfileManager.getProfile(DataStore.profileId) ?: return null)
     }
 
-    fun switchProfile(id: Long): Profile {
-        val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()
-        DataStore.profileId = result.id
-        return result
+    fun switchProfile(id: Long) {
+        DataStore.profileId = id
     }
 
-    fun init(app: Application, configureClass: KClass<out Any>) {
+    fun init(app: Application, configureClass: KClass<out Any>?) {
         this.app = app
-        this.configureIntent = {
-            PendingIntent.getActivity(it, 0, Intent(it, configureClass.java)
-                    .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), PendingIntent.FLAG_IMMUTABLE)
-        }
+//        this.configureIntent = {
+//            PendingIntent.getActivity(it, 0, Intent(it, configureClass.java)
+//                    .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), PendingIntent.FLAG_IMMUTABLE)
+//        }
 
         if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
             deviceStorage.moveDatabaseFrom(app, Key.DB_PUBLIC)
@@ -108,8 +115,16 @@ object Core : Configuration.Provider {
 
         // overhead of debug mode is minimal: https://github.com/Kotlin/kotlinx.coroutines/blob/f528898/docs/debugging.md#debug-mode
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
+//        Firebase.initialize(deviceStorage)  // multiple processes needs manual set-up
         Timber.plant(object : Timber.DebugTree() {
             override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                if (t == null) {
+                    if (priority != Log.DEBUG || BuildConfig.DEBUG) Log.println(priority, tag, message)
+//                    FirebaseCrashlytics.getInstance().log("${"XXVDIWEF".getOrElse(priority) { 'X' }}/$tag: $message")
+                } else {
+                    if (priority >= Log.WARN || priority == Log.DEBUG) Log.println(priority, tag, message)
+//                    if (priority >= Log.INFO) FirebaseCrashlytics.getInstance().recordException(t)
+                }
             }
         })
 
@@ -157,12 +172,8 @@ object Core : Configuration.Provider {
             if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
             else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
 
-    fun trySetPrimaryClip(clip: String, isSensitive: Boolean = false) = try {
-        clipboard.setPrimaryClip(ClipData.newPlainText(null, clip).apply {
-            if (isSensitive && Build.VERSION.SDK_INT >= 24) {
-                description.extras = persistableBundleOf(ClipDescription.EXTRA_IS_SENSITIVE to true)
-            }
-        })
+    fun trySetPrimaryClip(clip: String) = try {
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, clip))
         true
     } catch (e: RuntimeException) {
         Timber.d(e)

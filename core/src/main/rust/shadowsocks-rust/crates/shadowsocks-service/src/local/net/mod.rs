@@ -6,4 +6,4 @@ pub use self::{
 };
 
 mod tcp;
-pub(crate) mod udp;
+mod udp;

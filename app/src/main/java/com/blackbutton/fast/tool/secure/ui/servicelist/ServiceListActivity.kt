@@ -20,7 +20,7 @@ import com.blackbutton.fast.tool.secure.utils.ResourceUtils.readStringFromAssert
 import com.blackbutton.fast.tool.secure.utils.StatusBarUtils
 import com.blackbutton.fast.tool.secure.utils.Utils.addTheBestRoute
 import com.blackbutton.fast.tool.secure.utils.Utils.isNullOrEmpty
-import com.github.shadowsocks.R
+import com.first.conn.R
 import com.google.gson.reflect.TypeToken
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.tencent.mmkv.MMKV

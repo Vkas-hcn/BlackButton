@@ -25,7 +25,7 @@ import androidx.annotation.Nullable;
 
 
 import com.blackbutton.fast.tool.secure.utils.DensityUtils;
-import com.github.shadowsocks.R;
+import com.first.conn.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

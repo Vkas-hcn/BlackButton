@@ -56,6 +56,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         } else parsePort(publicStore.getString(key), default + userIndex)
     }
 
+    var smartProfileId: Long
+        get() = publicStore.getLong(Key.smartProfileId) ?: 0
+        set(value) = publicStore.putLong(Key.smartProfileId, value)
     var profileId: Long
         get() = publicStore.getLong(Key.id) ?: 0
         set(value) = publicStore.putLong(Key.id, value)
